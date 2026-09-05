@@ -217,26 +217,33 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    centerPreview in main.js) — switching between open rows re-centres on
    the same spot instead of visibly jumping to meet each row */
 .split.open .prev{flex-basis:57%}
-.prev .frame{position:absolute;inset:0;opacity:0;transition:opacity .42s ease}
-.prev .frame.on{opacity:1}
+/* every project's frame is stacked here regardless of which is showing —
+   opacity alone doesn't remove a hidden frame from hit-testing, so without
+   pointer-events:none every click anywhere in .prev would hit whichever
+   frame is last in DOM order (always on top), not the one actually visible */
+.prev .frame{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .42s ease}
+.prev .frame.on{opacity:1;pointer-events:auto}
 .frame{position:relative;width:100%;height:100%;overflow:hidden}
 .art{position:absolute;inset:0;cursor:zoom-in}
 /* resting values lifted from .15/.52 — real photography has detail to lose
    where the placeholder gradients had none */
 .prev .art,.prev .cslide{filter:saturate(calc(.28 + var(--l,0)*.85)) brightness(calc(.62 + var(--l,0)*.42))}
 
-/* multi-image projects: a single-frame carousel instead of a wrapped grid —
-   cover-cropped to the same project ratio as the single-image .art case, so
-   prev's height math in main.js never needs to special-case slide count.
-   the lightbox is the escape hatch for the uncropped original. */
-.carousel{position:absolute;inset:0}
-.cslides{position:absolute;inset:0}
-/* object-position anchors top rather than centre — these are page screenshots,
-   tall and various ratios, and the top (hero/header) is reliably the meaningful
-   part of a cover-crop; a centred crop can land mid-page arbitrarily */
-.cslide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;
-  opacity:0;cursor:zoom-in;transition:opacity .5s ease}
-.cslide.on{opacity:1}
+/* multi-image projects: a peeking filmstrip instead of a wrapped grid — the
+   current slide fills the frame with the next slide's edge visible, cover-
+   cropped to the same project ratio as the single-image .art case, so prev's
+   height math in main.js never needs to special-case slide count. Slide
+   width and the track's translateX are both set in px from JS (main.js's
+   show()), not this file: percentage flex-basis here would resolve against
+   .ctrack's own inset:0 width (== the frame width), not the wider total of
+   all slides side by side, so a CSS-only percentage translateX would shift
+   by the wrong amount. The lightbox is the escape hatch for the uncropped
+   original of whichever slide is current. */
+.carousel{position:absolute;inset:0;overflow:hidden}
+.ctrack{position:absolute;inset:0;display:flex;transition:transform .6s cubic-bezier(.2,.85,.24,1)}
+.cslide-wrap{flex:none;height:100%;cursor:pointer}
+.cslide-wrap.on{cursor:zoom-in}
+.cslide{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
 .cnav{
   position:absolute;top:50%;translate:0 -50%;z-index:2;width:32px;height:32px;
   display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;
@@ -358,13 +365,21 @@ footer.pg{
 .lb-close:hover{background:rgba(255,255,255,.18)}
 
 /* --- contact fx --------------------------------------------------------------
-   a free-floating clone of the footer email, flown to screen-centre when
-   Contact is clicked in either nav (see flyEmailToCenter in main.js). Both
-   ends of the flight are set inline from JS (not via a class) — browsers
-   interpolate the computed pixel value of left/top even when the JS target
-   is a percentage string, so no rect-lerp like the header dock's tween is
-   needed, but the target has to be inline too, or the class would lose to
-   the inline styles the flight's start position already set. */
+   clicking Contact in either nav dims the page and flies a real mailto link
+   (#emailFx) to screen-centre, where it stays until clicked (opens mail) or
+   the dimmed backdrop (#contactFx) is clicked to dismiss without emailing —
+   see openContactFx/closeContactFx in main.js. Both ends of the flight are
+   set inline from JS (not via a class): browsers interpolate the computed
+   pixel value of left/top even when the JS target is a percentage string,
+   so no rect-lerp like the header dock's tween is needed — but the target
+   has to be inline too, or a class would lose to the inline styles the
+   flight's start position already set. */
+.contactfx{
+  position:fixed;inset:0;z-index:79;pointer-events:none;
+  background:rgba(10,10,10,.75);
+  opacity:0;transition:opacity .35s ease;
+}
+.contactfx.on{opacity:1;pointer-events:auto}
 .emailfx{
   position:fixed;left:0;top:0;z-index:80;pointer-events:none;white-space:nowrap;
   font-variation-settings:"MONO" 1;letter-spacing:.13em;text-transform:uppercase;

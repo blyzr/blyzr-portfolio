@@ -159,7 +159,7 @@ $('#prev').innerHTML = projects.map((p, i) => `
   <div class="frame${i === 0 ? ' on' : ''}" data-i="${i}">${
     p.images.length > 1
       ? `<div class="carousel">
-           <div class="cslides">${p.images.map((src, n) => `<img class="cslide${n === 0 ? ' on' : ''}" src="/assets/img/${src}" alt="" data-n="${n}">`).join('')}</div>
+           <div class="ctrack">${p.images.map((src, n) => `<div class="cslide-wrap${n === 0 ? ' on' : ''}"><img class="cslide" src="/assets/img/${src}" alt="" data-n="${n}"></div>`).join('')}</div>
            <button class="cnav prev" type="button" aria-label="Previous image">&lsaquo;</button>
            <button class="cnav next" type="button" aria-label="Next image">&rsaquo;</button>
            <div class="cdots">${p.images.map((_, n) => `<span class="cdot${n === 0 ? ' on' : ''}" data-n="${n}"></span>`).join('')}</div>
@@ -307,6 +307,7 @@ $('#back').addEventListener('click', closeProject);
 addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (!lightbox.hidden) return closeLightbox();
+  if (contactFx.classList.contains('on')) return closeContactFx();
   if (openIndex >= 0) closeProject();
 });
 
@@ -369,50 +370,82 @@ document.querySelectorAll('.band .shot img').forEach(img => {
 });
 
 /* --- desktop carousel -----------------------------------------------------
-   multi-image projects: one image at a time (cover-cropped, same box as a
-   single-image project) with nav/dots, instead of the old wrapped grid —
-   the lightbox above is what shows each image uncropped. */
+   multi-image projects: a peeking filmstrip (current slide fills the frame,
+   next slide's edge shows at the right) with nav/dots, instead of the old
+   wrapped grid — the lightbox above is what shows each image uncropped.
+   Slide width and the track's translateX are computed in px here rather
+   than as a CSS percentage — see the .carousel comment in main.css for why.
+   Auto-advances slowly on a loop whenever this frame is the visible one,
+   the tab is in the foreground, and the mouse isn't over it; refreshers[]
+   lets layout() re-run every open carousel's show() on resize, since the
+   px measurements above go stale when the frame's width changes. */
+const PEEK = 0.88; // fraction of frame width the current slide occupies
+const refreshers = [];
+
 frames.forEach(frame => {
   const art = frame.querySelector('.art');
   if (art) art.addEventListener('click', () => openLightbox(art.dataset.src));
 
+  const track = frame.querySelector('.ctrack');
   const slides = [...frame.querySelectorAll('.cslide')];
   if (!slides.length) return;
-  const dots = [...frame.querySelectorAll('.cdot')];
+  const wraps = [...frame.querySelectorAll('.cslide-wrap')];
+  const dots  = [...frame.querySelectorAll('.cdot')];
   let cur = 0;
+
   const show = n => {
     cur = (n + slides.length) % slides.length;
-    slides.forEach((s, k) => s.classList.toggle('on', k === cur));
+    const slideW = Math.round(frame.getBoundingClientRect().width * PEEK);
+    wraps.forEach(w => { w.style.width = slideW + 'px'; });
+    track.style.transform = `translateX(-${cur * slideW}px)`;
+    wraps.forEach((w, k) => w.classList.toggle('on', k === cur));
     dots.forEach((d, k) => d.classList.toggle('on', k === cur));
   };
+  show(0);
+  refreshers.push(() => show(cur));
+
   frame.querySelector('.cnav.prev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); });
   frame.querySelector('.cnav.next').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); });
   dots.forEach((d, k) => d.addEventListener('click', e => { e.stopPropagation(); show(k); }));
-  slides.forEach(s => s.addEventListener('click', () => openLightbox(s.currentSrc || s.src)));
+  // clicking the current (fully visible) slide opens the lightbox; clicking
+  // the peeking next slide advances to it instead — it's barely visible, so
+  // "look closer" reads as "bring it forward", not "zoom this sliver"
+  slides.forEach(s => {
+    s.addEventListener('click', () => {
+      const n = +s.dataset.n;
+      if (n === cur) openLightbox(s.currentSrc || s.src);
+      else show(n);
+    });
+  });
+
+  setInterval(() => {
+    if (document.hidden || frame.matches(':hover') || !frame.classList.contains('on')) return;
+    show(cur + 1);
+  }, 4500);
 });
 
 /* --- contact fx -----------------------------------------------------------
-   clicking "Contact" in either nav flies a copy of the email to screen
-   centre and plays a colour-sweep across it there; hovering the real email
-   in the footer plays just the sweep, no movement (handled in CSS via
-   .contact-email:hover — see main.css). The flight itself is plain CSS
-   transitions rather than a measured tween like the header dock: left/top
-   interpolate cleanly from a px start to a 50% end because the browser
-   animates the computed pixel value either way, so no rect-lerp is needed. */
-const EMAIL = 'hello@bpjr.xyz';
-const emailFx = $('#emailFx');
-let emailFxTimer = null;
+   clicking "Contact" in either nav dims the page and flies a real mailto
+   link (#emailFx) to screen-centre, where it now stays until it's clicked
+   (opens mail) or the dimmed backdrop (#contactFx) is clicked to dismiss
+   without emailing. The flight itself is plain CSS transitions rather than
+   a measured tween like the header dock: left/top interpolate cleanly from
+   a px start to a 50% end because the browser animates the computed pixel
+   value either way, so no rect-lerp is needed — but both ends have to be
+   set inline from JS (not via a class), since an inline style always wins
+   over a class selector once it's been set. */
+const contactFx = $('#contactFx');
+const emailFx   = $('#emailFx');
+emailFx.tabIndex = -1; // a real <a>, so pointer-events:none alone won't keep
+                       // it out of keyboard tab order while hidden
 
-function flyEmailToCenter(trigger) {
+function openContactFx(trigger) {
   const r = trigger.getBoundingClientRect();
-  clearTimeout(emailFxTimer);
-  emailFx.textContent = EMAIL;
+  contactFx.classList.add('on');
+
   emailFx.classList.remove('sweep');
-  // an inline style always wins over a class selector, so the "arrive at
-  // centre" step below has to set left/top/transform inline too, matching
-  // the "start at trigger" step — a .center class here would never actually
-  // override these same inline properties once they're already set
   emailFx.style.transition = 'none';
+  emailFx.style.pointerEvents = 'none';
   emailFx.style.fontSize = getComputedStyle(trigger).fontSize;
   emailFx.style.left = r.left + 'px';
   emailFx.style.top = r.top + 'px';
@@ -425,17 +458,24 @@ function flyEmailToCenter(trigger) {
     emailFx.style.left = '50%';
     emailFx.style.top = '50%';
     emailFx.style.transform = 'translate(-50%,-50%) scale(2.6)';
+    emailFx.style.pointerEvents = 'auto';
+    emailFx.tabIndex = 0;
     setTimeout(() => emailFx.classList.add('sweep'), 700);
   });
-  emailFxTimer = setTimeout(() => {
-    emailFx.classList.remove('sweep');
-    emailFx.style.opacity = '0';
-  }, 700 + 900 + 700);
+}
+function closeContactFx() {
+  contactFx.classList.remove('on');
+  emailFx.classList.remove('sweep');
+  emailFx.style.pointerEvents = 'none';
+  emailFx.style.opacity = '0';
+  emailFx.tabIndex = -1;
 }
 
 document.querySelectorAll('a[href="#contact"], a[href="#contact-m"]').forEach(a => {
-  a.addEventListener('click', e => { e.preventDefault(); flyEmailToCenter(a); });
+  a.addEventListener('click', e => { e.preventDefault(); openContactFx(a); });
 });
+contactFx.addEventListener('click', closeContactFx);
+emailFx.addEventListener('click', closeContactFx); // mailto: still navigates via the default action
 
 /* --- layout ------------------------------------------------------------- */
 function layout() {
@@ -453,6 +493,9 @@ function layout() {
     const h = w / projects[idx].ratio;
     prev.style.height = Math.round(Math.min(h, cap)) + 'px';
     if (openIndex >= 0) centerPreview();
+    // frame width just changed along with prev's own box — every open
+    // carousel's slide width/translateX (both in px, not %) needs redoing
+    refreshers.forEach(fn => fn());
   }
   stale = true;
 }
