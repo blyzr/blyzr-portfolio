@@ -292,18 +292,20 @@ function applyDock() {
     // the subtitle so it would otherwise reach the sticky header earlier
     // than --subOp's fade (tied to the subtitle's position) accounts for,
     // and get visibly clipped under the header's opaque background rather
-    // than fading away cleanly first. Tied directly to how close its own
-    // bottom edge actually is to the header (in px), so it's finished
-    // fading with a real margin to spare before that could ever happen —
-    // not a scroll-distance guess that could be wrong at another viewport size.
+    // than fading away cleanly first. A binary on/off toggle (CSS transition
+    // handles the smoothing — see .hero h1) rather than tracking distance
+    // continuously, tied to how close its own bottom edge actually is to
+    // the header (in px) so the cutoff has a real margin to spare before
+    // that could ever happen — not a scroll-distance guess that could be
+    // wrong at another viewport size.
     const titleGap = $('#phTitle').getBoundingClientRect().bottom - header.offsetHeight;
-    root.style.setProperty('--titleOp', smoothBetween(60, 200, titleGap).toFixed(3));
+    root.style.setProperty('--titleOp', titleGap < 120 ? '0' : '1');
 
-    // wobbles wonky just before the fade above actually starts (260 vs the
-    // fade's own 200 threshold) — a lead-in, not simultaneous — and this
-    // whole branch only runs once titleGap is computed from a scroll
-    // position that's necessarily earlier than dock.p's own subtitle-based
-    // trigger, so it's already "before the livemark animation" by construction
+    // wobbles wonky just before the fade above actually triggers (260 vs the
+    // fade's own 120 cutoff) — a lead-in, not simultaneous — and this whole
+    // branch only runs once titleGap is computed from a scroll position
+    // that's necessarily earlier than dock.p's own subtitle-based trigger,
+    // so it's already "before the livemark animation" by construction
     setWonky(titleGap < 260);
     root.style.setProperty('--twght', wonkyFx.wght.toFixed(0));
     root.style.setProperty('--tslnt', wonkyFx.slnt.toFixed(2));

@@ -164,7 +164,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    wait for that. --titleOp is that same earlier schedule's fade (see
    applyDock) — separate from --subOp for the same reason. */
 .hero h1{
-  opacity:var(--titleOp,1);
+  /* --titleOp is a binary 0-or-1 now, not a distance-tracked value — this
+     transition is what actually makes it a fade rather than a hard cut */
+  opacity:var(--titleOp,1);transition:opacity .5s ease;
   letter-spacing:var(--tls,-0.03em);
   font-variation-settings:"MONO" 0,"CRSV" 0,"CASL" var(--tcasl,0),"slnt" var(--tslnt,0),"wght" var(--twght,600);
 }
