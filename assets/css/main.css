@@ -138,16 +138,26 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* --- hero --------------------------------------------------------------- */
 .hero{padding:var(--s9) var(--gut) var(--s8)}
-.hero h1,.dockfx{
-  margin:0;font-size:56px;font-weight:600;line-height:1.03;letter-spacing:var(--ls);
+.hero h1,.dockfx{margin:0;font-size:56px;font-weight:600;line-height:1.03}
+/* .dockfx (mobile's #fxSpec mark clone) keeps the original wonky wobble,
+   tied to dock.p/--hp same as everything else in .hd */
+.dockfx{
+  letter-spacing:var(--ls);
   font-variation-settings:"MONO" 0,"CRSV" 0,"CASL" var(--casl),"slnt" var(--slnt),"wght" var(--wght);
 }
 .hero h1 .ln{display:block}
-/* --titleOp is its own scroll-tied fade (see applyDock in main.js), separate
-   from --subOp — the title sits above the subtitle so it needs to finish
-   fading earlier, or it'd still be visible scrolling in behind the sticky
-   header rather than gone before it gets there */
-.hero h1{opacity:var(--titleOp,1)}
+/* the title gets its own wonky wobble on its own trigger (--twght etc, set
+   in applyDock via setWonky in main.js) rather than reusing --wght/--slnt/
+   --casl — those are tied to dock.p, which only starts moving once the
+   subtitle (further down the page) nears the header; the title, sitting
+   above the subtitle, needs to wobble+fade on its own earlier schedule, not
+   wait for that. --titleOp is that same earlier schedule's fade (see
+   applyDock) — separate from --subOp for the same reason. */
+.hero h1{
+  opacity:var(--titleOp,1);
+  letter-spacing:var(--tls,-0.03em);
+  font-variation-settings:"MONO" 0,"CRSV" 0,"CASL" var(--tcasl,0),"slnt" var(--tslnt,0),"wght" var(--twght,600);
+}
 .sub{margin:var(--s5) 0 0;max-width:44ch;color:var(--subtle);font-size:15px;
   line-height:1.6;opacity:var(--subOp,1)}
 .ph{visibility:hidden}

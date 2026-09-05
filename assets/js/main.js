@@ -225,6 +225,27 @@ function setDocked(next) {
   });
 }
 
+// same randomised-wonkiness idea as setDocked/dock above, but on its own
+// trigger for the title specifically (see the titleGap check in applyDock)
+// rather than dock.p, so it plays out earlier — before the subtitle (and
+// dock.p, and the livemark's bpjr->br contraction) are anywhere near firing
+const wonkyFx = { wght:600, slnt:0, casl:0, ls:-0.03 };
+let isWonky = false;
+
+function setWonky(next) {
+  if (isWonky === next) return;
+  isWonky = next;
+  gsap.to(wonkyFx, {
+    wght: next ? rand(430, 720) : 600,
+    slnt: next ? rand(-9, 0) : 0,
+    casl: next ? rand(0, 0.85) : 0,
+    ls:   next ? rand(-0.045, -0.005) : -0.03,
+    duration: DOCK_DURATION,
+    ease: 'power3.inOut',
+    overwrite: true
+  });
+}
+
 // docks a full subtitle-height before it would actually meet the header, so
 // the fade (below) has room to finish before the two ever visually overlap
 function deadZone() {
@@ -277,6 +298,17 @@ function applyDock() {
     // not a scroll-distance guess that could be wrong at another viewport size.
     const titleGap = $('#phTitle').getBoundingClientRect().bottom - header.offsetHeight;
     root.style.setProperty('--titleOp', smoothBetween(60, 200, titleGap).toFixed(3));
+
+    // wobbles wonky just before the fade above actually starts (260 vs the
+    // fade's own 200 threshold) — a lead-in, not simultaneous — and this
+    // whole branch only runs once titleGap is computed from a scroll
+    // position that's necessarily earlier than dock.p's own subtitle-based
+    // trigger, so it's already "before the livemark animation" by construction
+    setWonky(titleGap < 260);
+    root.style.setProperty('--twght', wonkyFx.wght.toFixed(0));
+    root.style.setProperty('--tslnt', wonkyFx.slnt.toFixed(2));
+    root.style.setProperty('--tcasl', wonkyFx.casl.toFixed(3));
+    root.style.setProperty('--tls', wonkyFx.ls.toFixed(4) + 'em');
   }
 }
 
