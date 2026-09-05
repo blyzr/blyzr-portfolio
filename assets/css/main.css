@@ -88,11 +88,19 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    luminance from a dim 28% baseline up to 70% the faster the cursor moves. */
 .livemark{
   display:inline-block;transform-origin:50% 60%;will-change:transform;
+  /* the perspective+rotate below promotes this to its own GPU-composited
+     layer, which is a known trigger for blurry text rendering in Chromium/
+     WebKit — backface-visibility:hidden is the standard fix. This was
+     already true before any text-shadow blur existed here; the previous
+     zero-blur shadow just supplied a sharp reference edge nearby that
+     happened to mask it, and blurring the shadow removed that camouflage
+     rather than causing new softness itself. */
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
   transform:perspective(620px)
     rotateY(calc(var(--mx,0)*var(--tilt,1)*17deg))
     rotateX(calc(var(--my,0)*var(--tilt,1)*-12deg))
     scale(calc(1 + var(--mp,0)*.05));
-  text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 3px color-mix(in srgb,var(--accent) calc(28% + var(--mv,0)*42%),transparent); /* unslop-ignore */
+  text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 2px color-mix(in srgb,var(--accent) calc(28% + var(--mv,0)*42%),transparent); /* unslop-ignore */
 }
 .dot{
   font-style:normal;color:var(--accent);display:inline-block;
