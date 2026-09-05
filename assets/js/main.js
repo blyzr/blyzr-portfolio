@@ -197,6 +197,8 @@ let previewIndex = 0;
 let light = { x:innerWidth / 2, y:innerHeight * 0.45 };
 let accent = hex('#d4472f');
 let pulse = 0;
+let mv = 0; // cursor-speed signal driving the livemark glow's luminance — see tick()
+let lastLx = light.x, lastLy = light.y;
 let gyro = null;
 let stale = true;
 
@@ -600,6 +602,17 @@ function tick() {
   if (stale) remeasure();
   const vw = innerWidth, vh = innerHeight;
   const touchLike = mobile || !finePointer;
+
+  // decays on its own each frame; a burst of movement pushes it back up
+  // toward 1, same spike-then-settle shape as `pulse` below but reacting to
+  // raw cursor speed rather than how much the accent colour is drifting
+  if (finePointer) {
+    const dist = Math.hypot(light.x - lastLx, light.y - lastLy);
+    lastLx = light.x; lastLy = light.y;
+    mv = Math.min(1, mv * 0.9 + dist / 60);
+    root.style.setProperty('--mv', mv.toFixed(3));
+  }
+
   if (touchLike) { light.x = vw / 2; light.y = vh * READING_ZONE; }
 
   applyDock();

@@ -80,16 +80,19 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 }
 .hd .navs a:hover{color:var(--accent)}
 
-/* soft glow now, blurred and tied to the live --accent (whichever project's
-   ink is currently tinting the page) rather than a fixed colour, so the
-   mark's shadow always matches what the rest of the page is doing */
+/* soft glow, tied to the live --accent (whichever project's ink is currently
+   tinting the page) rather than a fixed colour. Blur stays small (3px) —
+   this text renders as small as 17px docked, and a wider blur radius there
+   reads as the letterforms themselves going soft, not a glow behind them.
+   --mv (mouse speed, decays each frame in tick()) pulses the glow's
+   luminance from a dim 28% baseline up to 70% the faster the cursor moves. */
 .livemark{
   display:inline-block;transform-origin:50% 60%;will-change:transform;
   transform:perspective(620px)
     rotateY(calc(var(--mx,0)*var(--tilt,1)*17deg))
     rotateX(calc(var(--my,0)*var(--tilt,1)*-12deg))
     scale(calc(1 + var(--mp,0)*.05));
-  text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 8px color-mix(in srgb,var(--accent) 55%,transparent); /* unslop-ignore */
+  text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 3px color-mix(in srgb,var(--accent) calc(28% + var(--mv,0)*42%),transparent); /* unslop-ignore */
 }
 .dot{
   font-style:normal;color:var(--accent);display:inline-block;
