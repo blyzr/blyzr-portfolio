@@ -69,7 +69,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   -webkit-backdrop-filter:blur(calc(var(--hp,0)*16px));
   border-bottom:1px solid rgba(232,230,225,calc(var(--hp,0)*.11));
 }
-.hd .mark{font-size:17px;font-weight:600;letter-spacing:-.03em;line-height:1;
+.hd .mark{font-size:17px;font-weight:600;letter-spacing:-.03em;line-height:1.2;
   transform-origin:0 50%;will-change:transform}
 .hd .slot{flex:1;min-width:0;height:1px}
 .hd .spacer{flex:1}
@@ -92,8 +92,15 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    decays each frame in tick()) pulses the glow's luminance from a dim 28%
    baseline up to 70% the faster the cursor moves. */
 .livemark{
-  display:inline-block;transform-origin:50% 60%;will-change:transform;
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:inline-block;transform-origin:50% 60%;
+  /* neither backface-visibility:hidden nor will-change:transform any more —
+     both force this onto its own GPU-composited layer, and #hdMark's
+     font-size now changes every frame while scrolling (see applyDock) —
+     some browsers size that layer's backing store once and don't grow it
+     as the glyphs get bigger, clipping whatever now extends past the stale
+     bounds (the j's descender). Removing them costs a little of the
+     compositing-layer blur-avoidance backface-visibility was added for,
+     but scale() (removed earlier) was the actual dominant cause of that. */
   font-size:calc(1em * (1 + var(--mp,0)*.05));
   /* smoothstep of --hp (same t*t*(3-2t) curve as the JS smooth() helper) —
      a properly ramped ease-in-out for lm-pj's own motion below, rather than
@@ -116,6 +123,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    sweeps across them as they rise slightly and fade out */
 .lm-pj{
   display:inline-block;
+  /* its own shine already does the job a shadow-glow would — the inherited
+     one from .livemark just sat behind it competing/overlapping instead */
+  text-shadow:none;
   opacity:calc(1 - var(--hpEase, var(--hp,0)));
   transform:translateY(calc(var(--hpEase, var(--hp,0)) * -0.4em));
   background:linear-gradient(100deg,var(--text) 35%,var(--accent) 50%,var(--text) 65%);
