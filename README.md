@@ -90,7 +90,7 @@ for the set.
 | `.a5` | Kronan | `kronan_01` |
 | `.a6` | Chris Emery | album cover |
 | `.a7` | Discrete | album cover |
-| `.a8` | STITCH-UP! | poster, focal point pulled to `center 20%` so the crop keeps the faces |
+| `.a8` | TapTec | packaging mockup — logo lockup + real production boxes in one frame |
 | `.a9` | Min Reid | pitch pack cover, page 1 at 150dpi |
 | `.a10` | HITTIT | title frame at t=6s |
 
