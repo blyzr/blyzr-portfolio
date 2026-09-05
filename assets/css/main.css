@@ -231,7 +231,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    the lightbox is the escape hatch for the uncropped original. */
 .carousel{position:absolute;inset:0}
 .cslides{position:absolute;inset:0}
-.cslide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+/* object-position anchors top rather than centre — these are page screenshots,
+   tall and various ratios, and the top (hero/header) is reliably the meaningful
+   part of a cover-crop; a centred crop can land mid-page arbitrarily */
+.cslide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;
   opacity:0;cursor:zoom-in;transition:opacity .5s ease}
 .cslide.on{opacity:1}
 .cnav{
