@@ -232,22 +232,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .prev .art,.prev .cslide{filter:saturate(calc(.28 + var(--l,0)*.85)) brightness(calc(.62 + var(--l,0)*.42))}
 
 /* multi-image projects: a peeking filmstrip instead of a wrapped grid — the
-   current slide fills the frame with the next slide's edge visible, cover-
-   cropped to the same project ratio as the single-image .art case, so prev's
-   height math in main.js never needs to special-case slide count. Slide
-   width and the track's translateX are both set in px from JS (main.js's
-   show()), not this file: percentage flex-basis here would resolve against
-   .ctrack's own inset:0 width (== the frame width), not the wider total of
-   all slides side by side, so a CSS-only percentage translateX would shift
-   by the wrong amount. The lightbox is the escape hatch for the uncropped
-   original of whichever slide is current. */
+   current slide fills the frame height (its width follows from its own
+   natural aspect ratio, uncropped — no object-fit here at all, since height
+   +width:auto already preserves ratio) with the next slide's edge visible
+   alongside it. The track's translateX is set in px from JS (main.js's
+   show()), not this file: since each slide is its own natural width now,
+   there's no single per-slide step to express as a CSS percentage — main.js
+   sums the actual rendered width of every preceding slide instead. */
 .carousel{position:absolute;inset:0;overflow:hidden}
 /* gap's px value is duplicated as GAP in main.js's carousel show() — the
-   translateX step per slide has to include it, not just the slide width */
+   translateX offset has to add it once per preceding slide */
 .ctrack{position:absolute;inset:0;display:flex;gap:var(--s3);transition:transform .6s cubic-bezier(.2,.85,.24,1)}
 .cslide-wrap{flex:none;height:100%;cursor:pointer}
 .cslide-wrap.on{cursor:zoom-in}
-.cslide{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.cslide{height:100%;width:auto;display:block}
 .cnav{
   position:absolute;top:50%;translate:0 -50%;z-index:2;width:32px;height:32px;
   display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;

@@ -379,7 +379,6 @@ document.querySelectorAll('.band .shot img').forEach(img => {
    the tab is in the foreground, and the mouse isn't over it; refreshers[]
    lets layout() re-run every open carousel's show() on resize, since the
    px measurements above go stale when the frame's width changes. */
-const PEEK = 0.88; // fraction of frame width the current slide occupies
 const GAP = 12; // px between slides — must match .ctrack's gap:var(--s3) in main.css
 const refreshers = [];
 
@@ -394,16 +393,23 @@ frames.forEach(frame => {
   const dots  = [...frame.querySelectorAll('.cdot')];
   let cur = 0;
 
+  // each slide keeps its own natural aspect ratio (height:100% + width:auto
+  // in main.css) rather than a forced crop, so slide widths vary by image
+  // and the shift to bring slide `cur` to the frame's left edge has to sum
+  // every preceding slide's actual rendered width, not a fixed slideW
   const show = n => {
     cur = (n + slides.length) % slides.length;
-    const slideW = Math.round(frame.getBoundingClientRect().width * PEEK);
-    wraps.forEach(w => { w.style.width = slideW + 'px'; });
-    track.style.transform = `translateX(-${cur * (slideW + GAP)}px)`;
+    let offset = 0;
+    for (let k = 0; k < cur; k++) offset += wraps[k].getBoundingClientRect().width + GAP;
+    track.style.transform = `translateX(-${Math.round(offset)}px)`;
     wraps.forEach((w, k) => w.classList.toggle('on', k === cur));
     dots.forEach((d, k) => d.classList.toggle('on', k === cur));
   };
   show(0);
   refreshers.push(() => show(cur));
+  // a slide's rendered width is 0 until its image data arrives, so an
+  // offset summed before that finishes needs redoing once it lands
+  slides.forEach(s => s.addEventListener('load', () => show(cur)));
 
   frame.querySelector('.cnav.prev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); });
   frame.querySelector('.cnav.next').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); });
