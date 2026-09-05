@@ -380,6 +380,7 @@ document.querySelectorAll('.band .shot img').forEach(img => {
    lets layout() re-run every open carousel's show() on resize, since the
    px measurements above go stale when the frame's width changes. */
 const PEEK = 0.88; // fraction of frame width the current slide occupies
+const GAP = 12; // px between slides — must match .ctrack's gap:var(--s3) in main.css
 const refreshers = [];
 
 frames.forEach(frame => {
@@ -397,7 +398,7 @@ frames.forEach(frame => {
     cur = (n + slides.length) % slides.length;
     const slideW = Math.round(frame.getBoundingClientRect().width * PEEK);
     wraps.forEach(w => { w.style.width = slideW + 'px'; });
-    track.style.transform = `translateX(-${cur * slideW}px)`;
+    track.style.transform = `translateX(-${cur * (slideW + GAP)}px)`;
     wraps.forEach((w, k) => w.classList.toggle('on', k === cur));
     dots.forEach((d, k) => d.classList.toggle('on', k === cur));
   };

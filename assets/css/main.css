@@ -240,7 +240,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    by the wrong amount. The lightbox is the escape hatch for the uncropped
    original of whichever slide is current. */
 .carousel{position:absolute;inset:0;overflow:hidden}
-.ctrack{position:absolute;inset:0;display:flex;transition:transform .6s cubic-bezier(.2,.85,.24,1)}
+/* gap's px value is duplicated as GAP in main.js's carousel show() — the
+   translateX step per slide has to include it, not just the slide width */
+.ctrack{position:absolute;inset:0;display:flex;gap:var(--s3);transition:transform .6s cubic-bezier(.2,.85,.24,1)}
 .cslide-wrap{flex:none;height:100%;cursor:pointer}
 .cslide-wrap.on{cursor:zoom-in}
 .cslide{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
