@@ -246,6 +246,13 @@ function setWonky(next) {
   });
 }
 
+// true once the user has actually scrolled at all — gates the titleGap-based
+// setWonky call below so it can't immediately revert the one-time load-in
+// wonky (see the setTimeout near applyMode()) back to the base font before
+// the user has done anything; titleGap is always "far" at scrollY 0, so
+// without this gate that revert would fire on literally the next frame
+let hasScrolled = false;
+
 // docks a full subtitle-height before it would actually meet the header, so
 // the fade (below) has room to finish before the two ever visually overlap
 function deadZone() {
@@ -255,9 +262,18 @@ function deadZone() {
   return Math.max(1, subRect.top + scrollY - header.offsetHeight - subRect.height);
 }
 
-function applyDock() {
+// pure write phase — every rect this needs (mobileDock's from/to/heroPx, or
+// desktop's titleGap) is read up front in tick() and passed in, rather than
+// read here interleaved with the writes below. Reading and writing DOM
+// properties alternately forces a synchronous layout recalc on each read
+// that follows an uncommitted write; batching every read before every
+// write (across the whole frame, not just within one function) means the
+// browser only ever has to do that once per frame, not several times.
+// mobileDock/titleGap are null on frames where tick() decided nothing that
+// affects them could have changed (see dockActive there) — in which case
+// the writes that depend on them are just skipped, not redone with stale data.
+function applyDock(header, mobileDock, titleGap) {
   const p = dock.p;
-  const header = mobile ? $('#hdSpec') : $('#hd');
   header.style.setProperty('--hp', p.toFixed(3));
 
   root.style.setProperty('--wght', dock.wght.toFixed(0));
@@ -273,13 +289,12 @@ function applyDock() {
     // mobile's header mark only ever exists as this flying clone of #phSpec —
     // there's no separate persistent small mark the way desktop's #hdMark is,
     // so this one still relies on the from/to rect-lerp + scale technique
-    const ph = $('#phSpec'), fx = $('#fxSpec'), slot = $('#slotSpec');
-    const dockedPx = 22;
-    const from = ph.getBoundingClientRect();
-    const to   = slot.getBoundingClientRect();
-    const heroPx = parseFloat(getComputedStyle(ph).fontSize);
-    fx.style.transform = `translate(${lerp(from.left, to.left, p)}px,${lerp(from.top, to.top, p)}px) `
-      + `scale(${lerp(1, dockedPx / heroPx, p)})`;
+    if (mobileDock) {
+      const dockedPx = 22;
+      $('#fxSpec').style.transform =
+        `translate(${lerp(mobileDock.from.left, mobileDock.to.left, p)}px,${lerp(mobileDock.from.top, mobileDock.to.top, p)}px) `
+        + `scale(${lerp(1, dockedPx / mobileDock.heroPx, p)})`;
+    }
   } else {
     // desktop's mark shrinks via a real font-size change (crisp re-render)
     // rather than transform:scale (which resamples an already-rasterised
@@ -298,15 +313,14 @@ function applyDock() {
     // the header (in px) so the cutoff has a real margin to spare before
     // that could ever happen — not a scroll-distance guess that could be
     // wrong at another viewport size.
-    const titleGap = $('#phTitle').getBoundingClientRect().bottom - header.offsetHeight;
-    root.style.setProperty('--titleOp', titleGap < 120 ? '0' : '1');
-
-    // wobbles wonky just before the fade above actually triggers (260 vs the
-    // fade's own 120 cutoff) — a lead-in, not simultaneous — and this whole
-    // branch only runs once titleGap is computed from a scroll position
-    // that's necessarily earlier than dock.p's own subtitle-based trigger,
-    // so it's already "before the livemark animation" by construction
-    setWonky(titleGap < 260);
+    if (titleGap !== null) {
+      root.style.setProperty('--titleOp', titleGap < 120 ? '0' : '1');
+      // wobbles wonky just before the fade above actually triggers (260 vs
+      // the fade's own 120 cutoff) — a lead-in, not simultaneous — and only
+      // once the user has actually scrolled (see hasScrolled), so this can't
+      // stomp on the one-time load-in wonky before the user's done anything
+      if (hasScrolled) setWonky(titleGap < 260);
+    }
     root.style.setProperty('--twght', wonkyFx.wght.toFixed(0));
     root.style.setProperty('--tslnt', wonkyFx.slnt.toFixed(2));
     root.style.setProperty('--tcasl', wonkyFx.casl.toFixed(3));
@@ -581,6 +595,18 @@ narrowW.addEventListener('change', applyMode);
 portraitO.addEventListener('change', applyMode);
 applyMode();
 
+// title+bio entrance: starts at opacity 0 in main.css so the very first
+// paint is the "before" state — double rAF guarantees that paint has
+// actually happened before .loaded triggers the transition, or a browser
+// can coalesce "add the class immediately after load" into the very same
+// paint and skip the transition entirely. The wonky ease-in is a separate,
+// one-time timer rather than reusing the titleGap scroll trigger, since at
+// scrollY 0 titleGap always reads "far" — hasScrolled (set in the scroll
+// listener below) stops that from immediately reverting this back to the
+// base font before the user has done anything.
+requestAnimationFrame(() => requestAnimationFrame(() => $('#about').classList.add('loaded')));
+if (!reduce) setTimeout(() => { if (!hasScrolled) setWonky(true); }, 900);
+
 /* --- accent ------------------------------------------------------------- */
 function driftAccent(target, rate) {
   const t = hex(target);
@@ -615,6 +641,7 @@ if (finePointer) {
   addEventListener('pointermove', e => { light.x = e.clientX; light.y = e.clientY; }, { passive:true });
 }
 addEventListener('scroll', () => {
+  hasScrolled = true;
   stale = true;
   const threshold = deadZone();
   if (!isDocked && scrollY > threshold) setDocked(true);
@@ -626,7 +653,22 @@ addEventListener('scroll', () => {
 addEventListener('resize', applyMode, { passive:true });
 layout();
 
-if (reduce) { applyDock(); return; }
+if (reduce) {
+  // one-off call, not per-frame, so reading rects directly here (rather
+  // than via tick()'s batched read phase) costs nothing worth avoiding
+  const header = mobile ? $('#hdSpec') : $('#hd');
+  const headerH = header.offsetHeight;
+  let mobileDock = null, titleGap = null;
+  if (mobile) {
+    const ph = $('#phSpec'), slot = $('#slotSpec');
+    mobileDock = { from: ph.getBoundingClientRect(), to: slot.getBoundingClientRect(),
+                   heroPx: parseFloat(getComputedStyle(ph).fontSize) };
+  } else {
+    titleGap = $('#phTitle').getBoundingClientRect().bottom - headerH;
+  }
+  applyDock(header, mobileDock, titleGap);
+  return;
+}
 
 // rects only move on scroll and resize, so they are cached rather than
 // re-read for every element on every frame
@@ -637,30 +679,62 @@ function remeasure() {
   const targets = mobile ? bands : [...rows, prev];
   lit = targets.map(el => {
     const r = el.getBoundingClientRect();
-    return { el, cx:r.left + r.width / 2, cy:r.top + r.height / 2, wide:el === prev,
-             i:el.dataset ? +el.dataset.i : -1 };
+    // top/height are only for the mobile loupe below, which used to take
+    // its own separate getBoundingClientRect() per item every single frame
+    // — redundant with this same read, and another interleaved read/write
+    // pair on top of it. Caching them here means the loupe just reads this
+    // array (refreshed whenever stale, i.e. on scroll/resize, exactly when
+    // a band's position could actually have changed) instead.
+    return { el, cx:r.left + r.width / 2, cy:r.top + r.height / 2, top:r.top, height:r.height,
+             wide:el === prev, i:el.dataset ? +el.dataset.i : -1 };
   });
   stale = false;
 }
 
 function tick() {
+  // remeasure() (rows/prev/bands rects) resets `stale` to false, so it has
+  // to be captured before that happens — it's also this frame's signal for
+  // whether the header/title/mark rects below might have moved too
+  const wasStale = stale;
   if (stale) remeasure();
   const vw = innerWidth, vh = innerHeight;
   const touchLike = mobile || !finePointer;
 
-  // decays on its own each frame; a burst of movement pushes it back up
-  // toward 1, same spike-then-settle shape as `pulse` below but reacting to
-  // raw cursor speed rather than how much the accent colour is drifting
   if (finePointer) {
     const dist = Math.hypot(light.x - lastLx, light.y - lastLy);
     lastLx = light.x; lastLy = light.y;
     mv = Math.min(1, mv * 0.9 + dist / 60);
-    root.style.setProperty('--mv', mv.toFixed(3));
   }
-
   if (touchLike) { light.x = vw / 2; light.y = vh * READING_ZONE; }
 
-  applyDock();
+  // ---- read phase ---------------------------------------------------
+  // every getBoundingClientRect/getComputedStyle for the whole frame,
+  // gathered before any write below can invalidate layout and force a
+  // second (or third...) synchronous recalc later in this same frame.
+  const header = mobile ? $('#hdSpec') : $('#hd');
+  // dock-related rects (mobile's fx clone, or desktop's title-to-header
+  // gap) only change when scroll/resize happened or a dock/wonky tween is
+  // actively running — reusing last frame's applied values otherwise skips
+  // a getBoundingClientRect + getComputedStyle pair most frames spend
+  // sitting idle between scrolls
+  const dockActive = wasStale || gsap.isTweening(dock) || gsap.isTweening(wonkyFx);
+  let mobileDock = null, titleGap = null;
+  if (dockActive) {
+    const headerH = header.offsetHeight;
+    if (mobile) {
+      const ph = $('#phSpec'), slot = $('#slotSpec');
+      mobileDock = { from: ph.getBoundingClientRect(), to: slot.getBoundingClientRect(),
+                     heroPx: parseFloat(getComputedStyle(ph).fontSize) };
+    } else {
+      titleGap = $('#phTitle').getBoundingClientRect().bottom - headerH;
+    }
+  }
+  const marks = mobile ? specMarks : indexMarks;
+  const markRects = marks.map(m => m.getBoundingClientRect());
+
+  // ---- write phase ----------------------------------------------------
+  if (finePointer) root.style.setProperty('--mv', mv.toFixed(3));
+  applyDock(header, mobileDock, titleGap);
 
   const spread = Math.round(Math.min(vw, vh) * SPREAD);
   lamp.style.setProperty('--lx', light.x + 'px');
@@ -680,13 +754,16 @@ function tick() {
     driftAccent(projects[openIndex >= 0 ? openIndex : previewIndex].ink,
                 openIndex >= 0 ? 0.12 : 0.035);
   } else {
-    // loupe: colour exists only around the reading zone, with no visible boundary
+    // loupe: colour exists only around the reading zone, with no visible
+    // boundary. top/height come from the lit cache (refreshed in
+    // remeasure() whenever stale) rather than a fresh getBoundingClientRect
+    // per band here — that used to be a second, redundant read on top of
+    // the one remeasure() already just did.
     const zone = vh * READING_ZONE;
     const reach = Math.max(150, vh * 0.3);
     let brightest = null, brightestValue = 0;
     for (const item of lit) {
-      const r = item.el.getBoundingClientRect();
-      const n = clamp01(1 - Math.abs((r.top + r.height / 2) - zone) / reach);
+      const n = clamp01(1 - Math.abs((item.top + item.height / 2) - zone) / reach);
       const value = smoothBetween(0.30, 0.92, n);
       item.el.style.setProperty('--l', value.toFixed(3));
       if (value > brightestValue) { brightestValue = value; brightest = item; }
@@ -694,8 +771,8 @@ function tick() {
     if (brightest && brightestValue > 0.2) driftAccent(projects[brightest.i].ink, 0.09);
   }
 
-  for (const m of mobile ? specMarks : indexMarks) {
-    const r = m.getBoundingClientRect();
+  marks.forEach((m, k) => {
+    const r = markRects[k];
     let mx, my;
     if (touchLike && gyro) {
       mx = clamp11(gyro.gamma);
@@ -716,7 +793,7 @@ function tick() {
     m.style.setProperty('--my', s.y.toFixed(3));
     m.style.setProperty('--mp', (1 - Math.min(1, Math.hypot(s.x, s.y))).toFixed(3));
     m.style.setProperty('--tilt', (mobile ? MOBILE_TILT : TILT).toFixed(2));
-  }
+  });
 
   pulse *= 0.93;
   root.style.setProperty('--pulse', pulse.toFixed(3));

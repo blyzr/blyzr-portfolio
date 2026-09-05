@@ -129,7 +129,16 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    .livemark, further down) in favour of this dedicated layer. */
 #hdMark .livemark{text-shadow:none}
 .lm-glow{
-  position:absolute;inset:0;pointer-events:none;color:transparent;
+  /* position:absolute takes it out of flow, but that alone still paints
+     it above the static (non-positioned) visible text regardless of DOM
+     order — position, not just DOM order, decides stacking here — so it
+     needs an explicit negative z-index to actually sit behind. Being a
+     .livemark descendant with its own stacking context (from .livemark's
+     own transform) doesn't change this: z-index only ever compares
+     siblings within the same stacking context, which .lm-glow and the
+     visible b/pj/r/dot all share here regardless of each one's own
+     (unrelated) transform. */
+  position:absolute;inset:0;z-index:-1;pointer-events:none;color:transparent;
   text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 2px color-mix(in srgb,var(--accent) calc(28% + var(--mv,0)*42%),transparent);
 }
 .lm-pj-g{opacity:calc(1 - var(--hpEase, var(--hp,0)))}
@@ -163,7 +172,13 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 #hdMark .dot{transform:translateX(calc(var(--hp,0) * -0.85em)) scale(calc(1 + var(--pulse)*.34))}
 
 /* --- hero --------------------------------------------------------------- */
-.hero{padding:var(--s9) var(--gut) var(--s8)}
+/* title+bio fade in together as one entrance on load (.loaded is added via
+   JS after a double rAF — see main.js — so the browser has actually
+   painted the opacity:0 start before the transition to 1 begins); this is
+   separate from --titleOp/--subOp, which take over afterwards for the
+   later scroll-based fades on each element individually */
+.hero{padding:var(--s9) var(--gut) var(--s8);opacity:0;transition:opacity .8s ease}
+.hero.loaded{opacity:1}
 .hero h1,.dockfx{margin:0;font-size:56px;font-weight:600;line-height:1.03}
 /* .dockfx (mobile's #fxSpec mark clone) keeps the original wonky wobble,
    tied to dock.p/--hp same as everything else in .hd */
@@ -501,6 +516,7 @@ footer.pg{
   #grain{animation:none}
   .livemark{transform:none;text-shadow:none}
   .lm-glow{text-shadow:none}
+  .hero{opacity:1;transition:none}
   .row-blurb{clip-path:none;transform:none;opacity:1}
   .prev .art,.prev .cslide{filter:saturate(.9) brightness(.92) !important}
   .cslide{transition:none}
