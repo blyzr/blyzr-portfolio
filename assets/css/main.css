@@ -80,28 +80,33 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 }
 .hd .navs a:hover{color:var(--accent)}
 
-/* soft glow, tied to the live --accent (whichever project's ink is currently
-   tinting the page) rather than a fixed colour. Blur stays small (3px) —
-   this text renders as small as 17px docked, and a wider blur radius there
-   reads as the letterforms themselves going soft, not a glow behind them.
-   --mv (mouse speed, decays each frame in tick()) pulses the glow's
-   luminance from a dim 28% baseline up to 70% the faster the cursor moves. */
+/* tilt (rotateY/rotateX) is back — that part was fine. It was specifically
+   scale() that caused the blur: scaling text via transform resamples an
+   already-rasterised glyph instead of re-rendering it crisply at the new
+   size, so the hover-grow effect now happens as a real font-size change
+   instead. backface-visibility:hidden is still worth keeping alongside the
+   3D rotate, since perspective+rotate on its own is a known trigger for
+   blurry text in Chromium/WebKit (forces GPU-layer compositing) — this was
+   already true before any of this session's changes. Blur stays small
+   (2px) since this renders as small as 17px docked. --mv (mouse speed,
+   decays each frame in tick()) pulses the glow's luminance from a dim 28%
+   baseline up to 70% the faster the cursor moves. */
 .livemark{
   display:inline-block;transform-origin:50% 60%;will-change:transform;
-  /* the perspective+rotate below promotes this to its own GPU-composited
-     layer, which is a known trigger for blurry text rendering in Chromium/
-     WebKit — backface-visibility:hidden is the standard fix. This was
-     already true before any text-shadow blur existed here; the previous
-     zero-blur shadow just supplied a sharp reference edge nearby that
-     happened to mask it, and blurring the shadow removed that camouflage
-     rather than causing new softness itself. */
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  font-size:calc(1em * (1 + var(--mp,0)*.05));
   transform:perspective(620px)
     rotateY(calc(var(--mx,0)*var(--tilt,1)*17deg))
-    rotateX(calc(var(--my,0)*var(--tilt,1)*-12deg))
-    scale(calc(1 + var(--mp,0)*.05));
+    rotateX(calc(var(--my,0)*var(--tilt,1)*-12deg));
   text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 2px color-mix(in srgb,var(--accent) calc(28% + var(--mv,0)*42%),transparent); /* unslop-ignore */
 }
+/* bpjr. contracts to br. as the header docks on scroll (--hp, set in
+   applyDock, is the same 0..1 dock progress everything else in .hd uses) —
+   p and j fade out and r slides left by an approximate em amount to close
+   the gap they leave; not pixel-exact against the variable font's shifting
+   width, but close enough for a playful contraction, not a precise one */
+.lm-pj{opacity:calc(1 - var(--hp,0))}
+.lm-r{display:inline-block;transform:translateX(calc(var(--hp,0) * -1em))}
 .dot{
   font-style:normal;color:var(--accent);display:inline-block;
   transform:scale(calc(1 + var(--pulse)*.34));

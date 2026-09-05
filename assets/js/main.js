@@ -235,19 +235,8 @@ function deadZone() {
 }
 
 function applyDock() {
-  const ph       = mobile ? $('#phSpec')   : $('#phTitle');
-  const fx       = mobile ? $('#fxSpec')   : $('#fxTitle');
-  const slot     = mobile ? $('#slotSpec') : $('#slot');
-  const header   = mobile ? $('#hdSpec')   : $('#hd');
-  const dockedPx = mobile ? 22 : 15;
-
-  const from = ph.getBoundingClientRect();
-  const to   = slot.getBoundingClientRect();
-  const heroPx = parseFloat(getComputedStyle(ph).fontSize);
   const p = dock.p;
-
-  fx.style.transform = `translate(${lerp(from.left, to.left, p)}px,${lerp(from.top, to.top, p)}px) `
-    + `scale(${lerp(1, dockedPx / heroPx, p)})`;
+  const header = mobile ? $('#hdSpec') : $('#hd');
   header.style.setProperty('--hp', p.toFixed(3));
 
   root.style.setProperty('--wght', dock.wght.toFixed(0));
@@ -259,12 +248,24 @@ function applyDock() {
   // if the fade still rides the tween all the way to the end
   root.style.setProperty('--subOp', (1 - smoothBetween(0, 0.6, p)).toFixed(3));
 
-  $('#hdMark').style.transform = `scale(${lerp(MARK_HERO_PX / MARK_DOCK_PX, 1, p)})`;
-
-  if (!mobile) {
-    const first = $('#fxLn1'), second = $('#fxLn2');
-    second.style.transform =
-      `translate(${(first.offsetWidth + 15) * p}px, ${-first.offsetHeight * p}px)`;
+  if (mobile) {
+    // mobile's header mark only ever exists as this flying clone of #phSpec —
+    // there's no separate persistent small mark the way desktop's #hdMark is,
+    // so this one still relies on the from/to rect-lerp + scale technique
+    const ph = $('#phSpec'), fx = $('#fxSpec'), slot = $('#slotSpec');
+    const dockedPx = 22;
+    const from = ph.getBoundingClientRect();
+    const to   = slot.getBoundingClientRect();
+    const heroPx = parseFloat(getComputedStyle(ph).fontSize);
+    fx.style.transform = `translate(${lerp(from.left, to.left, p)}px,${lerp(from.top, to.top, p)}px) `
+      + `scale(${lerp(1, dockedPx / heroPx, p)})`;
+  } else {
+    // desktop's mark shrinks via a real font-size change (crisp re-render)
+    // rather than transform:scale (which resamples an already-rasterised
+    // glyph) — the hero title itself no longer flies into the header at
+    // all; #phTitle lost its .ph class and is just a normal, static,
+    // always-visible element now, scrolling away like anything else
+    $('#hdMark').style.fontSize = `${lerp(MARK_HERO_PX, MARK_DOCK_PX, p)}px`;
   }
 }
 
@@ -527,8 +528,7 @@ function applyMode() {
   mobile = isMobile();
   $('#stage-index').hidden = mobile;
   $('#stage-spec').hidden  = !mobile;
-  $('#fxTitle').style.display = mobile ? 'none' : '';
-  $('#fxSpec').style.display  = mobile ? '' : 'none';
+  $('#fxSpec').style.display = mobile ? '' : 'none';
   if (openIndex >= 0) closeProject();
   layout();
 }
