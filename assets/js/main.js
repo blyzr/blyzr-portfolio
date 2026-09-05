@@ -37,8 +37,8 @@ const projects = [
     blurb:'A logo system, proven on real packaging.',
     project:'Tech-company logo and brand system.', deliverables:'Lockup, icon, wordmark, packaging application.', skills:'Identity design, logo systems.',
     tools:['Illustrator','Photoshop'] },
-  { name:'MikFlix', kind:'Site', year:'19', art:'a3', ink:'#c0392b', ratio:1.349,
-    images:['mikflix.webp','mikflix-wordmark.png','mikflix-thumbsystem.png'],
+  { name:'MikFlix', kind:'Site', year:'19', art:'a3', ink:'#c0392b', ratio:1.2,
+    images:['mikflix-wordmark.png','mikflix-hero.webp','mikflix-overview.webp','mikflix-majorlazer.webp','mikflix-cyberpunk.webp'],
     blurb:'Designed, then built. Live seven years.',
     project:'Director\u2019s portfolio site.', deliverables:'Custom WordPress theme, thumbnail system, client guide.', skills:'Web design, front-end build.',
     tools:['Photoshop','Illustrator','WordPress'] },
@@ -158,8 +158,13 @@ $('#list').innerHTML = projects.map((p, i) => `
 $('#prev').innerHTML = projects.map((p, i) => `
   <div class="frame${i === 0 ? ' on' : ''}" data-i="${i}">${
     p.images.length > 1
-      ? `<div class="pgrid">${p.images.map(src => `<img src="/assets/img/${src}" alt="">`).join('')}</div>`
-      : `<div class="art ${p.art}"></div>`
+      ? `<div class="carousel">
+           <div class="cslides">${p.images.map((src, n) => `<img class="cslide${n === 0 ? ' on' : ''}" src="/assets/img/${src}" alt="" data-n="${n}">`).join('')}</div>
+           <button class="cnav prev" type="button" aria-label="Previous image">&lsaquo;</button>
+           <button class="cnav next" type="button" aria-label="Next image">&rsaquo;</button>
+           <div class="cdots">${p.images.map((_, n) => `<span class="cdot${n === 0 ? ' on' : ''}" data-n="${n}"></span>`).join('')}</div>
+         </div>`
+      : `<div class="art ${p.art}" data-src="/assets/img/${p.images[0]}"></div>`
   }</div>`).join('');
 
 $('#bands').innerHTML = projects.map((p, i) => `
@@ -182,9 +187,6 @@ const bg      = $('#bg');
 const lamp    = $('#lamp');
 const rows    = [...listEl.querySelectorAll('.row')];
 const frames  = [...prev.querySelectorAll('.frame')];
-// pgrid images may still be 0-height at the first measurement — 'load'
-// doesn't bubble, so this is registered on the capture phase instead
-prev.addEventListener('load', () => { if (!mobile) layout(); }, true);
 const bands   = [...document.querySelectorAll('.band')];
 const indexMarks = [...document.querySelectorAll('#stage-index .livemark')];
 const specMarks  = [...document.querySelectorAll('#stage-spec .livemark')];
@@ -302,7 +304,11 @@ rows.forEach(row => {
   row.addEventListener('click', () => openIndex === i ? closeProject() : openProject(i));
 });
 $('#back').addEventListener('click', closeProject);
-addEventListener('keydown', e => { if (e.key === 'Escape' && openIndex >= 0) closeProject(); });
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!lightbox.hidden) return closeLightbox();
+  if (openIndex >= 0) closeProject();
+});
 
 let openBandIndex = -1;
 
@@ -334,55 +340,134 @@ bands.forEach(band => {
   });
 });
 
-// a multi-image frame's real height can't come from a single ratio the way
-// .art's can — briefly take it out of the absolute crossfade stack, let it
-// size itself naturally at the target width, read that, then put it back.
-// synchronous start to finish, so nothing paints the intermediate state.
-function measureMultiHeight(i, width) {
-  const el = frames[i];
-  if (!el) return width * 0.6;
-  const { position, inset, width: w0, height: h0 } = el.style;
-  el.style.position = 'static';
-  el.style.inset = 'auto';
-  el.style.width = width + 'px';
-  el.style.height = 'auto';
-  const h = el.scrollHeight;
-  el.style.position = position;
-  el.style.inset = inset;
-  el.style.width = w0;
-  el.style.height = h0;
-  return h;
+/* --- lightbox ------------------------------------------------------------
+   the preview and band galleries both crop (cover/fixed-ratio) so the grid
+   stays tidy — this is the escape hatch to see an image uncropped, full res. */
+const lightbox = $('#lightbox');
+const lbImg    = $('#lbImg');
+let lbCloseTimer = null;
+
+function openLightbox(src) {
+  if (!src) return;
+  clearTimeout(lbCloseTimer);
+  lbImg.src = src;
+  lightbox.hidden = false;
+  requestAnimationFrame(() => lightbox.classList.add('on'));
 }
+function closeLightbox() {
+  lightbox.classList.remove('on');
+  lbCloseTimer = setTimeout(() => { lightbox.hidden = true; lbImg.src = ''; }, 320);
+}
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+$('#lbClose').addEventListener('click', closeLightbox);
+
+// bound directly to each image (rather than one delegated listener) so
+// stopPropagation reliably runs before a click can bubble up into a band's
+// own open/close toggle — a mobile shot's <img> sits inside a clickable band
+document.querySelectorAll('.band .shot img').forEach(img => {
+  img.addEventListener('click', e => { e.stopPropagation(); openLightbox(img.currentSrc || img.src); });
+});
+
+/* --- desktop carousel -----------------------------------------------------
+   multi-image projects: one image at a time (cover-cropped, same box as a
+   single-image project) with nav/dots, instead of the old wrapped grid —
+   the lightbox above is what shows each image uncropped. */
+frames.forEach(frame => {
+  const art = frame.querySelector('.art');
+  if (art) art.addEventListener('click', () => openLightbox(art.dataset.src));
+
+  const slides = [...frame.querySelectorAll('.cslide')];
+  if (!slides.length) return;
+  const dots = [...frame.querySelectorAll('.cdot')];
+  let cur = 0;
+  const show = n => {
+    cur = (n + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('on', k === cur));
+    dots.forEach((d, k) => d.classList.toggle('on', k === cur));
+  };
+  frame.querySelector('.cnav.prev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); });
+  frame.querySelector('.cnav.next').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); });
+  dots.forEach((d, k) => d.addEventListener('click', e => { e.stopPropagation(); show(k); }));
+  slides.forEach(s => s.addEventListener('click', () => openLightbox(s.currentSrc || s.src)));
+});
+
+/* --- contact fx -----------------------------------------------------------
+   clicking "Contact" in either nav flies a copy of the email to screen
+   centre and plays a colour-sweep across it there; hovering the real email
+   in the footer plays just the sweep, no movement (handled in CSS via
+   .contact-email:hover — see main.css). The flight itself is plain CSS
+   transitions rather than a measured tween like the header dock: left/top
+   interpolate cleanly from a px start to a 50% end because the browser
+   animates the computed pixel value either way, so no rect-lerp is needed. */
+const EMAIL = 'hello@bpjr.xyz';
+const emailFx = $('#emailFx');
+let emailFxTimer = null;
+
+function flyEmailToCenter(trigger) {
+  const r = trigger.getBoundingClientRect();
+  clearTimeout(emailFxTimer);
+  emailFx.textContent = EMAIL;
+  emailFx.classList.remove('sweep');
+  // an inline style always wins over a class selector, so the "arrive at
+  // centre" step below has to set left/top/transform inline too, matching
+  // the "start at trigger" step — a .center class here would never actually
+  // override these same inline properties once they're already set
+  emailFx.style.transition = 'none';
+  emailFx.style.fontSize = getComputedStyle(trigger).fontSize;
+  emailFx.style.left = r.left + 'px';
+  emailFx.style.top = r.top + 'px';
+  emailFx.style.transform = 'translate(0,0) scale(1)';
+  emailFx.style.opacity = '1';
+  void emailFx.offsetWidth; // flush the reset before re-enabling transitions
+  emailFx.style.transition = '';
+
+  requestAnimationFrame(() => {
+    emailFx.style.left = '50%';
+    emailFx.style.top = '50%';
+    emailFx.style.transform = 'translate(-50%,-50%) scale(2.6)';
+    setTimeout(() => emailFx.classList.add('sweep'), 700);
+  });
+  emailFxTimer = setTimeout(() => {
+    emailFx.classList.remove('sweep');
+    emailFx.style.opacity = '0';
+  }, 700 + 900 + 700);
+}
+
+document.querySelectorAll('a[href="#contact"], a[href="#contact-m"]').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); flyEmailToCenter(a); });
+});
 
 /* --- layout ------------------------------------------------------------- */
 function layout() {
   // the reading zone sits partway down, so the sheet needs runway left below it
   $('#specTail').style.height = Math.round(innerHeight * (1 - READING_ZONE)) + 'px';
   if (!mobile) {
-    // height follows the preview's own width at the *actual* showing image's
-    // ratio, so the box matches the photo exactly and cover crops nothing
+    // height follows the preview's own width at the showing project's ratio,
+    // so the box matches the art/carousel exactly — carousels use the same
+    // single ratio as a single-image project rather than their own natural
+    // size, so cropping (cover) is consistent and the box never has to
+    // re-measure per slide
     const cap = openIndex >= 0 ? innerHeight * 0.78 : innerHeight - 110;
     const w = prev.getBoundingClientRect().width || split.clientWidth * (openIndex >= 0 ? 0.66 : 0.44);
     const idx = openIndex >= 0 ? openIndex : previewIndex;
-    const p = projects[idx];
-    const h = p.images.length > 1 ? measureMultiHeight(idx, w) : w / p.ratio;
+    const h = w / projects[idx].ratio;
     prev.style.height = Math.round(Math.min(h, cap)) + 'px';
-    if (openIndex >= 0) alignPreviewToRow(openIndex);
+    if (openIndex >= 0) centerPreview();
   }
   stale = true;
 }
 
-// nudges the whole preview box up/down so its centre lines up with the row
-// that's open, rather than sitting static in the corner of the split
-function alignPreviewToRow(i) {
-  const row = rows[i];
-  if (!row) return;
-  const rowRect   = row.getBoundingClientRect();
+// keeps the open preview centred in the viewport's vertical middle, rather
+// than chasing whichever row was just clicked — a fixed target regardless
+// of row index means switching between open rows no longer visibly shifts
+// the image down to meet the row (recomputed on each open/switch/resize,
+// same as the rest of layout(), not tracked continuously during scroll)
+function centerPreview() {
   const splitRect = split.getBoundingClientRect();
   const prevH     = prev.getBoundingClientRect().height;
-  const rowMid    = rowRect.top + rowRect.height / 2 - splitRect.top;
+  const viewportMidLocal = innerHeight / 2 - splitRect.top;
   const maxTop    = Math.max(0, splitRect.height - prevH);
-  const top       = Math.max(0, Math.min(rowMid - prevH / 2, maxTop));
+  const top       = Math.max(0, Math.min(viewportMidLocal - prevH / 2, maxTop));
   prev.style.transform = `translateY(${Math.round(top)}px)`;
 }
 
@@ -481,8 +566,11 @@ function tick() {
       const reach = item.wide ? radius * 1.3 : radius;
       item.el.style.setProperty('--l', smooth(clamp01(1 - d / reach)).toFixed(3));
     }
+    // hovering drifts much slower than an open (clicked) row — flicking the
+    // mouse across the whole list quickly would otherwise strobe the tint
+    // through every row's colour on the way past
     driftAccent(projects[openIndex >= 0 ? openIndex : previewIndex].ink,
-                openIndex >= 0 ? 0.1 : 0.07);
+                openIndex >= 0 ? 0.12 : 0.035);
   } else {
     // loupe: colour exists only around the reading zone, with no visible boundary
     const zone = vh * READING_ZONE;

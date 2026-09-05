@@ -212,26 +212,48 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
     opacity .3s ease;
 }
 /* the side preview is the only place images show on desktop — it stays
-   visible and grows when a row opens, tracking that row's position
-   (see alignPreviewToRow in main.js) rather than fading away */
+   visible and grows when a row opens, and centres in the viewport's
+   vertical middle rather than tracking the row's own position (see
+   centerPreview in main.js) — switching between open rows re-centres on
+   the same spot instead of visibly jumping to meet each row */
 .split.open .prev{flex-basis:57%}
 .prev .frame{position:absolute;inset:0;opacity:0;transition:opacity .42s ease}
 .prev .frame.on{opacity:1}
 .frame{position:relative;width:100%;height:100%;overflow:hidden}
-.art{position:absolute;inset:0}
-/* multi-image projects: a wrapped, uncropped grid instead of one background —
-   .prev's height is measured from this in main.js (layout/measureMultiHeight),
-   since it can't be derived from a single ratio like the .art case can */
-.pgrid{display:flex;flex-wrap:wrap;align-content:flex-start;gap:var(--s3);width:100%}
-.pgrid img{flex:1 1 45%;max-width:100%;width:100%;height:auto;display:block;border-radius:var(--r1)}
+.art{position:absolute;inset:0;cursor:zoom-in}
 /* resting values lifted from .15/.52 — real photography has detail to lose
    where the placeholder gradients had none */
-.prev .art{filter:saturate(calc(.28 + var(--l,0)*.85)) brightness(calc(.62 + var(--l,0)*.42))}
+.prev .art,.prev .cslide{filter:saturate(calc(.28 + var(--l,0)*.85)) brightness(calc(.62 + var(--l,0)*.42))}
 
-/* Project artwork. Order matches the projects array in main.js. */
+/* multi-image projects: a single-frame carousel instead of a wrapped grid —
+   cover-cropped to the same project ratio as the single-image .art case, so
+   prev's height math in main.js never needs to special-case slide count.
+   the lightbox is the escape hatch for the uncropped original. */
+.carousel{position:absolute;inset:0}
+.cslides{position:absolute;inset:0}
+.cslide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;cursor:zoom-in;transition:opacity .5s ease}
+.cslide.on{opacity:1}
+.cnav{
+  position:absolute;top:50%;translate:0 -50%;z-index:2;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;
+  color:var(--text);background:rgba(15,15,15,.55);border-radius:100px;
+  opacity:0;transition:opacity .25s,background .25s;
+}
+.carousel:hover .cnav{opacity:1}
+.cnav:hover{background:rgba(15,15,15,.82)}
+.cnav.prev{left:var(--s3)}
+.cnav.next{right:var(--s3)}
+.cdots{position:absolute;bottom:var(--s3);left:50%;translate:-50% 0;z-index:2;display:flex;gap:6px}
+.cdot{width:6px;height:6px;border-radius:100px;background:rgba(232,230,225,.4);
+  cursor:pointer;transition:background .25s,transform .25s}
+.cdot.on{background:var(--text);transform:scale(1.3)}
+
+/* Project artwork. Order matches the projects array in main.js.
+   MikFlix (a3) is multi-image now, rendered as a .carousel instead — see
+   the projects array's images list rather than a background rule here. */
 .a1 {background:url("/assets/img/dewlora.webp")   center/cover}
 .a2 {background:url("/assets/img/truspray.webp")  center/cover}
-.a3 {background:url("/assets/img/mikflix.webp")   center/cover}
 .a4 {background:url("/assets/img/goodhands.webp") center/cover}
 .a5 {background:url("/assets/img/kronan.webp")    center/cover}
 .a6 {background:url("/assets/img/emery.webp")     center/cover}
@@ -299,6 +321,60 @@ footer.pg{
   font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
 }
 
+/* the footer link and the flying #emailFx clone share this sweep — a bright
+   band crosses the letters once via a text-clipped gradient sliding through */
+@keyframes sweep{from{background-position:140% 0}to{background-position:-40% 0}}
+.contact-email{
+  display:inline-block;color:inherit;transition:color .3s;
+}
+.contact-email:hover{
+  background:linear-gradient(100deg,var(--text) 35%,var(--accent) 50%,var(--text) 65%);
+  background-size:260% 100%;-webkit-background-clip:text;background-clip:text;
+  color:transparent;animation:sweep .9s ease;
+}
+
+/* --- lightbox --------------------------------------------------------------
+   full-res, uncropped view of whatever image was just clicked (art frame,
+   carousel slide, or a mobile band's gallery shot). [hidden] blocks the
+   opacity transition from ever playing, so main.js clears it a frame before
+   adding .on, and re-adds it only after the fade-out transition finishes. */
+.lightbox{
+  position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,10,10,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;transition:opacity .3s ease;
+}
+.lightbox[hidden]{display:none}
+.lightbox.on{opacity:1}
+.lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:var(--r1);
+  box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lb-close{
+  position:absolute;top:var(--s5);right:var(--s5);width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;
+  color:var(--text);background:rgba(255,255,255,.08);border-radius:100px;transition:background .25s;
+}
+.lb-close:hover{background:rgba(255,255,255,.18)}
+
+/* --- contact fx --------------------------------------------------------------
+   a free-floating clone of the footer email, flown to screen-centre when
+   Contact is clicked in either nav (see flyEmailToCenter in main.js). Both
+   ends of the flight are set inline from JS (not via a class) — browsers
+   interpolate the computed pixel value of left/top even when the JS target
+   is a percentage string, so no rect-lerp like the header dock's tween is
+   needed, but the target has to be inline too, or the class would lose to
+   the inline styles the flight's start position already set. */
+.emailfx{
+  position:fixed;left:0;top:0;z-index:80;pointer-events:none;white-space:nowrap;
+  font-variation-settings:"MONO" 1;letter-spacing:.13em;text-transform:uppercase;
+  opacity:0;transform:translate(0,0) scale(1);
+  transition:left .85s cubic-bezier(.2,.85,.24,1),top .85s cubic-bezier(.2,.85,.24,1),
+    transform .85s cubic-bezier(.2,.85,.24,1),opacity .3s;
+}
+.emailfx.sweep{
+  background:linear-gradient(100deg,var(--text) 35%,var(--accent) 50%,var(--text) 65%);
+  background-size:260% 100%;-webkit-background-clip:text;background-clip:text;
+  color:transparent;animation:sweep .9s ease;
+}
+
 /* --- narrow --------------------------------------------------------------
    kept in sync with the JS `narrow` breakpoint — portrait only, so a
    landscape phone gets the full desktop sizing along with the desktop stage */
@@ -323,5 +399,8 @@ footer.pg{
   #grain{animation:none}
   .livemark{transform:none;text-shadow:none}
   .row-blurb{clip-path:none;transform:none;opacity:1}
-  .prev .art{filter:saturate(.9) brightness(.92) !important}
+  .prev .art,.prev .cslide{filter:saturate(.9) brightness(.92) !important}
+  .cslide{transition:none}
+  .emailfx{transition:opacity .2s}
+  .contact-email:hover,.emailfx.sweep{animation:none}
 }

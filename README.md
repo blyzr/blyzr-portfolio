@@ -77,15 +77,15 @@ casual axis and tracking land somewhere slightly different each time.
 
 ## Project artwork
 
-`.a1` to `.a10` at the end of the artwork block in `main.css`, in the same
-order as the `projects` array in `main.js`. All WebP, capped at 1400px, ~1.6MB
-for the set.
+`.a1` to `.a11` (minus `.a3`, see below) at the end of the artwork block in
+`main.css`, in the same order as the `projects` array in `main.js`. These are
+single-image projects only — each renders as one `.art` div with a CSS
+background, cover-cropped. All WebP, capped at 1400px, ~1.6MB for the set.
 
 | Class | Project | Source |
 |---|---|---|
 | `.a1` | Dewlora | own prerender, widened to 3:2 with a blurred fill so the open preview crops gradient, not product |
 | `.a2` | Trü Spray | embroidered mockup, cropped off page 2 of `TruSprayLogoMockups.pdf` |
-| `.a3` | MikFlix | 4×2 montage of the portrait thumbnail system |
 | `.a4` | Good Hands | identity sheet |
 | `.a5` | Kronan | `kronan_01` |
 | `.a6` | Chris Emery | album cover |
@@ -93,6 +93,24 @@ for the set.
 | `.a8` | TapTec | packaging mockup — logo lockup + real production boxes in one frame |
 | `.a9` | Min Reid | pitch pack cover, page 1 at 150dpi |
 | `.a10` | HITTIT | title frame at t=6s |
+| `.a11` | Koru | own render |
+
+A project with more than one image (MikFlix, Min Reid) skips `.art` entirely
+and renders as a `.carousel` instead — one slide visible at a time (also
+cover-cropped, to the same project `ratio` an `.art` div would use), with
+nav arrows/dots. `.a3` is MikFlix's now-unused art slot: it still has an
+`art:'a3'` field in `main.js` for shape-consistency with the other project
+objects, but nothing reads it once a project has more than one image, so
+there's no `.a3` rule in `main.css` any more.
+
+Multi-image or not, a click on the image opens it uncropped in the lightbox
+(`#lightbox` in `index.html`) — that's the escape hatch for whatever cover
+crops away, rather than a second copy of every asset at a different ratio.
+
+MikFlix's images (2026-09-05): `mikflix-wordmark.png` (kept, the actual
+logo/brand mark) plus four live-site screenshots pulled from Nextcloud's
+`portfolio-content/03_MikFlix_Portfolio_Site/Website_Screenshots` — replacing
+the old single hero screenshot and the separate thumbnail-system montage.
 
 Masters are on LXC 102 at `/opt/portfolio-src`, mirrored from Nextcloud
 (`blyzr/portfolio-content`), along with everything a case study would need —
