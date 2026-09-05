@@ -266,6 +266,17 @@ function applyDock() {
     // all; #phTitle lost its .ph class and is just a normal, static,
     // always-visible element now, scrolling away like anything else
     $('#hdMark').style.fontSize = `${lerp(MARK_HERO_PX, MARK_DOCK_PX, p)}px`;
+
+    // the title fades on its own schedule, not dock.p/--hp — it sits above
+    // the subtitle so it would otherwise reach the sticky header earlier
+    // than --subOp's fade (tied to the subtitle's position) accounts for,
+    // and get visibly clipped under the header's opaque background rather
+    // than fading away cleanly first. Tied directly to how close its own
+    // bottom edge actually is to the header (in px), so it's finished
+    // fading with a real margin to spare before that could ever happen —
+    // not a scroll-distance guess that could be wrong at another viewport size.
+    const titleGap = $('#phTitle').getBoundingClientRect().bottom - header.offsetHeight;
+    root.style.setProperty('--titleOp', smoothBetween(60, 200, titleGap).toFixed(3));
   }
 }
 

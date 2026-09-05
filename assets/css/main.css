@@ -95,6 +95,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   display:inline-block;transform-origin:50% 60%;will-change:transform;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
   font-size:calc(1em * (1 + var(--mp,0)*.05));
+  /* smoothstep of --hp (same t*t*(3-2t) curve as the JS smooth() helper) —
+     a properly ramped ease-in-out for lm-pj's own motion below, rather than
+     tracking --hp linearly like .lm-r and the dot still do */
+  --hpEase:calc(var(--hp,0) * var(--hp,0) * (3 - 2 * var(--hp,0)));
   transform:perspective(620px)
     rotateY(calc(var(--mx,0)*var(--tilt,1)*17deg))
     rotateX(calc(var(--my,0)*var(--tilt,1)*-12deg));
@@ -105,7 +109,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    p and j fade out and r slides left by an approximate em amount to close
    the gap they leave; not pixel-exact against the variable font's shifting
    width, but close enough for a playful contraction, not a precise one */
-.lm-pj{opacity:calc(1 - var(--hp,0))}
+/* p/j fade on the eased --hpEase curve rather than linear --hp: a colour
+   shine (the same gradient-clip sweep technique as .contact-email/.emailfx,
+   but driven directly by position instead of a one-shot @keyframes, since
+   this tracks continuous scroll rather than playing once on a click/hover)
+   sweeps across them as they rise slightly and fade out */
+.lm-pj{
+  display:inline-block;
+  opacity:calc(1 - var(--hpEase, var(--hp,0)));
+  transform:translateY(calc(var(--hpEase, var(--hp,0)) * -0.4em));
+  background:linear-gradient(100deg,var(--text) 35%,var(--accent) 50%,var(--text) 65%);
+  background-size:260% 100%;
+  background-position:calc(140% - var(--hpEase, var(--hp,0)) * 180%) 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
 .lm-r{display:inline-block;transform:translateX(calc(var(--hp,0) * -0.85em))}
 .dot{
   font-style:normal;color:var(--accent);display:inline-block;
@@ -126,6 +143,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   font-variation-settings:"MONO" 0,"CRSV" 0,"CASL" var(--casl),"slnt" var(--slnt),"wght" var(--wght);
 }
 .hero h1 .ln{display:block}
+/* --titleOp is its own scroll-tied fade (see applyDock in main.js), separate
+   from --subOp — the title sits above the subtitle so it needs to finish
+   fading earlier, or it'd still be visible scrolling in behind the sticky
+   header rather than gone before it gets there */
+.hero h1{opacity:var(--titleOp,1)}
 .sub{margin:var(--s5) 0 0;max-width:44ch;color:var(--subtle);font-size:15px;
   line-height:1.6;opacity:var(--subOp,1)}
 .ph{visibility:hidden}
