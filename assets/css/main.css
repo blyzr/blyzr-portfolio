@@ -92,7 +92,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    decays each frame in tick()) pulses the glow's luminance from a dim 28%
    baseline up to 70% the faster the cursor moves. */
 .livemark{
-  display:inline-block;transform-origin:50% 60%;
+  position:relative;display:inline-block;transform-origin:50% 60%;
   /* neither backface-visibility:hidden nor will-change:transform any more —
      both force this onto its own GPU-composited layer, and #hdMark's
      font-size now changes every frame while scrolling (see applyDock) —
@@ -116,6 +116,25 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    p and j fade out and r slides left by an approximate em amount to close
    the gap they leave; not pixel-exact against the variable font's shifting
    width, but close enough for a playful contraction, not a precise one */
+/* #hdMark's glow moved to one dedicated layer (.lm-glow below) instead of
+   living partly on .livemark, partly per-span — splitting it across
+   independently-animated spans meant each one had to carry (or explicitly
+   drop) its own copy, which is how p/j ended up with no glow at all while
+   b/r kept theirs: coherent by accident, not by design. .lm-glow mirrors
+   the exact same b/pj/r/dot structure as the visible text so it moves in
+   perfect lockstep through the whole bpjr->br transition, not just at the
+   two endpoints, and carries the entire glow as one shape. Mobile's
+   .livemark ("br.", no morph) is untouched — its glow still lives on the
+   shared base rule below; only #hdMark's copy is silenced (see #hdMark
+   .livemark, further down) in favour of this dedicated layer. */
+#hdMark .livemark{text-shadow:none}
+.lm-glow{
+  position:absolute;inset:0;pointer-events:none;color:transparent;
+  text-shadow:calc(var(--mx,0)*var(--tilt,1)*-7px) calc(var(--my,0)*var(--tilt,1)*-6px) 2px color-mix(in srgb,var(--accent) calc(28% + var(--mv,0)*42%),transparent);
+}
+.lm-pj-g{opacity:calc(1 - var(--hpEase, var(--hp,0)))}
+.lm-r-g,.lm-dot-g{display:inline-block;transform:translateX(calc(var(--hp,0) * -0.85em))}
+
 /* p/j fade on the eased --hpEase curve rather than linear --hp: a colour
    shine (the same gradient-clip sweep technique as .contact-email/.emailfx,
    but driven directly by position instead of a one-shot @keyframes, since
@@ -123,9 +142,6 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    sweeps across them as they rise slightly and fade out */
 .lm-pj{
   display:inline-block;
-  /* its own shine already does the job a shadow-glow would — the inherited
-     one from .livemark just sat behind it competing/overlapping instead */
-  text-shadow:none;
   opacity:calc(1 - var(--hpEase, var(--hp,0)));
   transform:translateY(calc(var(--hpEase, var(--hp,0)) * -0.4em));
   background:linear-gradient(100deg,var(--text) 35%,var(--accent) 50%,var(--text) 65%);
@@ -484,6 +500,7 @@ footer.pg{
   #lamp{display:none}
   #grain{animation:none}
   .livemark{transform:none;text-shadow:none}
+  .lm-glow{text-shadow:none}
   .row-blurb{clip-path:none;transform:none;opacity:1}
   .prev .art,.prev .cslide{filter:saturate(.9) brightness(.92) !important}
   .cslide{transition:none}
