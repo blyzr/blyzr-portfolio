@@ -102,8 +102,13 @@ const projects = [
 
 const $ = sel => document.querySelector(sel);
 const pad = i => String(i + 1).padStart(2, '0');
-const metaDesk = (i, p) => `${pad(i)} · ${p.kind}${p.year ? ' · ' + p.year : ''}`;
-const metaMob  = (i, p) => `${pad(i)} · ${p.kind}${p.year ? ' · 20' + p.year : ''}`;
+// year in the data is a bare two-digit string ('16') — 2000s is a safe
+// assumption for everything in this list, but a bare "16" reads as a
+// count or a version, not a year, hence the "20" prefix on display.
+// desktop and mobile showed this identically once mobile already had the
+// prefix and desktop didn't — one meta() now, not a metaDesk/metaMob pair.
+const fullYear = p => p.year ? '20' + p.year : '';
+const meta = (i, p) => `${pad(i)} · ${p.kind}${fullYear(p) ? ' · ' + fullYear(p) : ''}`;
 // a project's ordered media: its video (if any) first, poster as its
 // fallback/cover frame, then its stills — the single list every renderer
 // below (mobile gallery, desktop preview, carousel) walks so video and
@@ -193,7 +198,7 @@ $('#list').innerHTML = projects.map((p, i) => `
     <span class="row-top">
       <span class="row-name">${p.name}</span>
       <span class="row-blurb">${p.blurb}</span>
-      <span class="row-meta">${metaDesk(i, p)}</span>
+      <span class="row-meta">${meta(i, p)}</span>
     </span>
     <span class="detail"><span class="detail-in">
       ${facts(p)}
@@ -224,7 +229,7 @@ $('#prev').innerHTML = projects.map((p, i) => {
 $('#bands').innerHTML = projects.map((p, i) => `
   <button class="band" type="button" data-i="${i}" style="--pa:${p.ink}">
     <span class="band-top">
-      <span class="txt"><h3>${p.name}</h3><span class="meta">${metaMob(i, p)}</span></span>
+      <span class="txt"><h3>${p.name}</h3><span class="meta">${meta(i, p)}</span></span>
     </span>
     <span class="detail"><span class="detail-in">
       ${gallery(p)}
