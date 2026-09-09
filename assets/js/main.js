@@ -76,7 +76,27 @@ const projects = [
     images:['hittit.webp'],
     blurb:'A broadcast open, dissolved into fluid.',
     project:'Broadcast ident.', deliverables:'30-second animated open.', skills:'Motion design, simulation.',
-    tools:['Cinema 4D','After Effects'] }
+    tools:['Cinema 4D','After Effects'] },
+  { name:'X&G', kind:'Motion', year:'16', art:'a12', ink:'#b5502c', ratio:1.316,
+    images:['xg-1.webp','xg-2.webp'],
+    blurb:'A neon sign, animated into life.',
+    project:'Neon sign animation for an electronic duo.', deliverables:'Looping animated sign, 3D render.', skills:'3D animation, lighting.',
+    tools:['Cinema 4D','After Effects'] },
+  { name:'NightOwl', kind:'App', year:'16', art:'a13', ink:'#6f7a45', ratio:0.562,
+    images:['nightowl-1.webp','nightowl-2.webp','nightowl-3.webp','nightowl-4.webp','nightowl-5.webp','nightowl-6.webp'],
+    blurb:'A nightlife app, concepted screen by screen.',
+    project:'Social nightlife app concept.', deliverables:'Six-screen UI concept.', skills:'UI design, concept work.',
+    tools:['Photoshop'] },
+  { name:'Pangea Survival', kind:'Identity', year:'16', art:'a14', ink:'#af8a3e', ratio:1.427,
+    images:['pangea-1.webp','pangea-2.webp','pangea-3.webp'],
+    blurb:'Three logo directions for a survival brand.',
+    project:'Logo concepts for a survival-gear company.', deliverables:'Three mark directions.', skills:'Logo design.',
+    tools:['Illustrator'] },
+  { name:'Allie Nixon', kind:'Identity', year:'16', art:'a15', ink:'#4d5a68', ratio:1.0,
+    images:['allienixon-1.webp','allienixon-2.webp'],
+    blurb:'A logotype for an independent musician.',
+    project:'Logotype for an independent musician.', deliverables:'Wordmark, application.', skills:'Lettering, logo design.',
+    tools:['Photoshop','Illustrator'] }
 ];
 
 const $ = sel => document.querySelector(sel);

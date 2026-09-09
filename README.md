@@ -95,13 +95,22 @@ background, cover-cropped. All WebP, capped at 1400px, ~1.6MB for the set.
 | `.a10` | HITTIT | title frame at t=6s |
 | `.a11` | Koru | own render |
 
-A project with more than one image (MikFlix, Min Reid) skips `.art` entirely
-and renders as a `.carousel` instead — one slide visible at a time (also
-cover-cropped, to the same project `ratio` an `.art` div would use), with
-nav arrows/dots. `.a3` is MikFlix's now-unused art slot: it still has an
-`art:'a3'` field in `main.js` for shape-consistency with the other project
-objects, but nothing reads it once a project has more than one image, so
-there's no `.a3` rule in `main.css` any more.
+A project with more than one image (MikFlix, Min Reid, X&G, NightOwl, Pangea
+Survival, Allie Nixon) skips `.art` entirely and renders as a `.carousel`
+instead — one slide visible at a time (also cover-cropped, to the same
+project `ratio` an `.art` div would use), with nav arrows/dots. `.a3`, `.a12`,
+`.a13`, `.a14`, `.a15` are unused art slots: each still has an `art:'aN'`
+field in `main.js` for shape-consistency with the other project objects, but
+nothing reads it once a project has more than one image, so there's no
+matching rule in `main.css`.
+
+**Behance backfill (2026-09-09):** four early projects pulled in from
+`behance.net/blayzereid` — X&G Neon Sign Animation, NightOwl Mobile App
+Concepts, Pangea Survival Identity, Allie Nixon Identity. OGZ United Identity
+was on the same profile and deliberately excluded. Source stills pulled from
+Behance's CDN, converted to WebP capped at 1400px via the alpine/imagemagick
+throwaway-container recipe above. Copy is a compressed paraphrase of each
+project's original Behance caption, not new client-facing copy.
 
 Multi-image or not, a click on the image opens it uncropped in the lightbox
 (`#lightbox` in `index.html`) — that's the escape hatch for whatever cover
