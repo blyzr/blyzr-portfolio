@@ -324,6 +324,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .prev .frame.on{opacity:1;pointer-events:auto}
 .frame{position:relative;width:100%;height:100%;overflow:hidden}
 .art{position:absolute;inset:0;cursor:zoom-in}
+/* a single-media project with no stills (HITTIT) renders its video directly
+   as .art rather than through the carousel — inset:0 alone doesn't reliably
+   stretch a replaced element to fill, so width/height/object-fit are explicit.
+   No zoom-in cursor: unlike a still, there's no uncropped version to open. */
+video.art{width:100%;height:100%;object-fit:cover;display:block;cursor:default}
 /* resting values lifted from .15/.52 — real photography has detail to lose
    where the placeholder gradients had none */
 .prev .art,.prev .cslide{filter:saturate(calc(.28 + var(--l,0)*.85)) brightness(calc(.62 + var(--l,0)*.42))}
@@ -342,7 +347,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .ctrack{position:absolute;inset:0;display:flex;gap:var(--s3);transition:transform .6s cubic-bezier(.2,.85,.24,1)}
 .cslide-wrap{flex:none;height:100%;cursor:pointer}
 .cslide-wrap.on{cursor:zoom-in}
-.cslide{height:100%;width:auto;display:block}
+.cslide{height:100%;width:auto;display:block;object-fit:contain}
 .cnav{
   position:absolute;top:50%;translate:0 -50%;z-index:2;width:32px;height:32px;
   display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;
@@ -384,18 +389,23 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   overflow:hidden;background:var(--surface);
   outline:1px solid color-mix(in srgb,var(--pa) 30%,transparent);outline-offset:-1px;
 }
-.shot img{width:100%;height:auto;display:block}
+.shot img,.shot video{width:100%;height:auto;display:block}
 
 /* mobile only: multiple images ride one swipeable strip instead of
-   wrapping — a scroll carousel reads as a mobile pattern, and a fixed
-   crop keeps the cards a consistent size as you scroll between them */
+   wrapping — a scroll carousel reads as a mobile pattern. touch-action
+   pins the gesture to the horizontal axis explicitly: left to the browser's
+   default heuristic, a swipe that starts even slightly diagonally (easy to
+   do one-handed) gets claimed by the page's own vertical scroll instead,
+   and the strip never moves. Each card keeps its image's own natural
+   ratio rather than a fixed crop — portrait shots (phone-screen concepts,
+   Behance stills) stay uncropped instead of losing their top and bottom
+   to a landscape-shaped box. */
 .band .gallery.multi{
   flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
-  margin:0 calc(var(--gut) * -1) var(--s3);padding:0 var(--gut);
+  touch-action:pan-x;margin:0 calc(var(--gut) * -1) var(--s3);padding:0 var(--gut);
 }
 .band .gallery.multi::-webkit-scrollbar{display:none}
-.band .gallery.multi .shot{flex:0 0 78%;aspect-ratio:16/10;scroll-snap-align:start}
-.band .gallery.multi .shot img{height:100%;object-fit:cover}
+.band .gallery.multi .shot{flex:0 0 78%;scroll-snap-align:start}
 
 /* --- specimen ----------------------------------------------------------- */
 .spec-hero{padding:var(--s7) var(--gut) var(--s6);text-align:center;

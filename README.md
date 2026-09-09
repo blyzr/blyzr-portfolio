@@ -112,6 +112,53 @@ Behance's CDN, converted to WebP capped at 1400px via the alpine/imagemagick
 throwaway-container recipe above. Copy is a compressed paraphrase of each
 project's original Behance caption, not new client-facing copy.
 
+## Video slides
+
+A project can carry a `video` (filename in `assets/video/`) plus a `poster`
+(filename in `assets/img/`, defaults to `images[0]`) alongside its `images`.
+`mediaOf(p)` in `main.js` is the single ordered list every renderer walks —
+video first if present, then stills — so video and image slides mix through
+the same carousel/gallery/single-art code paths instead of each needing a
+separate branch. A project with only a video and no stills (HITTIT) skips
+the carousel chrome entirely and renders the `<video>` directly as `.art`.
+
+Videos play muted/looped/inline, autoplaying via both the HTML attribute and
+a JS `.play()` kick (some browsers only honour the `muted` *property*, not
+the attribute, before allowing programmatic playback). `prefers-reduced-motion`
+gets native `controls` and no forced autoplay instead, same as every other
+motion effect in this file.
+
+HITTIT's and X&G's masters: HITTIT from its own `/opt/portfolio-src` export;
+X&G was never in that mirror — Behance's case study embeds it via Adobe's
+CCV player, whose embed page exposes a direct, token-expiring `.mp4` URL.
+Both re-encoded muted (audio stripped) H.264 via the same alpine/ffmpeg
+throwaway-container pattern used for images — HITTIT scaled to 960px wide
+(~8.6MB for 30s), X&G left near its original 1024×576 (~250KB for 10s).
+
+## Touch and aspect ratio (2026-09-09)
+
+`.band .gallery.multi` (the portrait-mobile swipeable strip) now sets
+`touch-action:pan-x` explicitly. Left to the browser's default heuristic, a
+swipe that starts even slightly diagonally — easy to do one-handed — could
+get claimed by the page's own vertical scroll instead of the strip, which
+read as "swipe doesn't work." Its cards also dropped the fixed `aspect-ratio:
+16/10` + `object-fit:cover` crop in favour of each image's own natural ratio,
+matching how the non-multi (desktop-row and single-image-band) gallery
+already behaved — portrait shots (phone screens, Behance stills) no longer
+lose their top and bottom to a landscape-shaped box.
+
+## Landscape-phone preview height (2026-09-09)
+
+A landscape phone gets the desktop split/preview (see "Two layouts" above),
+but its viewport is short. `layout()` used to cap the preview's height to a
+fraction of `innerHeight`, which cover-cropped hard into exactly the tall
+images that most needed room. `landscapePhone` (a matchMedia mirroring the
+CSS's own `orientation:landscape and max-width:900px` breakpoint) now lifts
+that cap to `Infinity` there instead — `centerPreview()` already centres the
+box on the viewport's vertical middle and clamps it within `.split`, so the
+extra height just becomes something to scroll up or down into, uncropped,
+rather than something to crop away.
+
 Multi-image or not, a click on the image opens it uncropped in the lightbox
 (`#lightbox` in `index.html`) — that's the escape hatch for whatever cover
 crops away, rather than a second copy of every asset at a different ratio.

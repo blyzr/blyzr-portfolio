@@ -11,6 +11,11 @@ const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const narrowW = matchMedia('(max-width: 860px)');
 const portraitO = matchMedia('(orientation: portrait)');
 const isMobile = () => narrowW.matches && portraitO.matches;
+// matches the CSS landscape-phone breakpoint below — a rotated phone still
+// gets the desktop split/preview, but its viewport is short, so the usual
+// innerHeight-based cap on the preview (see layout()) would crop hard into
+// exactly the images that most need their full height
+const landscapePhone = matchMedia('(orientation: landscape) and (max-width: 900px)');
 
 const TILT = 1.0;
 const MOBILE_TILT = 1.45;
@@ -52,6 +57,16 @@ const projects = [
     blurb:'A 3D portrait against display type.',
     project:'3D portrait sleeve artwork.', deliverables:'Final sleeve art, display type.', skills:'3D rendering, typography.',
     tools:['Cinema 4D','Photoshop','Illustrator'] },
+  { name:'NightOwl', kind:'App', year:'16', art:'a13', ink:'#6f7a45', ratio:0.562,
+    images:['nightowl-1.webp','nightowl-2.webp','nightowl-3.webp','nightowl-4.webp','nightowl-5.webp','nightowl-6.webp'],
+    blurb:'A nightlife app, concepted screen by screen.',
+    project:'Social nightlife app concept.', deliverables:'Six-screen UI concept.', skills:'UI design, concept work.',
+    tools:['Photoshop'] },
+  { name:'HITTIT', kind:'Motion', year:'22', art:'a10', ink:'#3fb098', ratio:1.777,
+    video:'hittit.mp4', poster:'hittit.webp', images:[],
+    blurb:'A broadcast open, dissolved into fluid.',
+    project:'Broadcast ident.', deliverables:'30-second animated open.', skills:'Motion design, simulation.',
+    tools:['Cinema 4D','After Effects'] },
   { name:'Kronan', kind:'Artwork', year:'21', art:'a5', ink:'#a86a4e', ratio:1.0,
     images:['kronan.webp'],
     blurb:'Three covers, one series.',
@@ -72,21 +87,11 @@ const projects = [
     blurb:'Twenty pages, one grid, one duotone.',
     project:'Feature film pitch pack.', deliverables:'20-page pitch document.', skills:'Editorial design, art direction.',
     tools:['InDesign','Photoshop'] },
-  { name:'HITTIT', kind:'Motion', year:'22', art:'a10', ink:'#3fb098', ratio:1.777,
-    images:['hittit.webp'],
-    blurb:'A broadcast open, dissolved into fluid.',
-    project:'Broadcast ident.', deliverables:'30-second animated open.', skills:'Motion design, simulation.',
-    tools:['Cinema 4D','After Effects'] },
-  { name:'X&G', kind:'Motion', year:'16', art:'a12', ink:'#b5502c', ratio:1.316,
-    images:['xg-1.webp','xg-2.webp'],
+  { name:'X&G', kind:'Motion', year:'16', art:'a12', ink:'#b5502c', ratio:1.778,
+    video:'xg.mp4', poster:'xg-1.webp', images:['xg-1.webp','xg-2.webp'],
     blurb:'A neon sign, animated into life.',
     project:'Neon sign animation for an electronic duo.', deliverables:'Looping animated sign, 3D render.', skills:'3D animation, lighting.',
     tools:['Cinema 4D','After Effects'] },
-  { name:'NightOwl', kind:'App', year:'16', art:'a13', ink:'#6f7a45', ratio:0.562,
-    images:['nightowl-1.webp','nightowl-2.webp','nightowl-3.webp','nightowl-4.webp','nightowl-5.webp','nightowl-6.webp'],
-    blurb:'A nightlife app, concepted screen by screen.',
-    project:'Social nightlife app concept.', deliverables:'Six-screen UI concept.', skills:'UI design, concept work.',
-    tools:['Photoshop'] },
   { name:'Pangea Survival', kind:'Identity', year:'16', art:'a14', ink:'#af8a3e', ratio:1.427,
     images:['pangea-1.webp','pangea-2.webp','pangea-3.webp'],
     blurb:'Three logo directions for a survival brand.',
@@ -103,9 +108,26 @@ const $ = sel => document.querySelector(sel);
 const pad = i => String(i + 1).padStart(2, '0');
 const metaDesk = (i, p) => `${pad(i)} · ${p.kind}${p.year ? ' · ' + p.year : ''}`;
 const metaMob  = (i, p) => `${pad(i)} · ${p.kind}${p.year ? ' · 20' + p.year : ''}`;
-const gallery = p => `<span class="gallery${p.images.length > 1 ? ' multi' : ''}">${
-  p.images.map(src => `<span class="shot"><img src="/assets/img/${src}" alt="" loading="lazy"></span>`).join('')
-}</span>`;
+// a project's ordered media: its video (if any) first, poster as its
+// fallback/cover frame, then its stills — the single list every renderer
+// below (mobile gallery, desktop preview, carousel) walks so video and
+// image slides can mix without each renderer needing its own branch
+const mediaOf = p => [
+  ...(p.video ? [{ type:'video', src:p.video, poster:p.poster || p.images[0] || '' }] : []),
+  ...p.images.map(src => ({ type:'img', src }))
+];
+const videoTag = (cls, s, extra = '') => `<video class="${cls}" src="/assets/video/${s.src}"${
+  s.poster ? ` poster="/assets/img/${s.poster}"` : ''
+}${extra} muted loop playsinline autoplay preload="metadata"></video>`;
+const gallery = p => {
+  const media = mediaOf(p);
+  return `<span class="gallery${media.length > 1 ? ' multi' : ''}">${
+    media.map(s => s.type === 'video'
+      ? `<span class="shot vid">${videoTag('', s)}</span>`
+      : `<span class="shot"><img src="/assets/img/${s.src}" alt="" loading="lazy"></span>`
+    ).join('')
+  }</span>`;
+};
 const tools = p => `<span class="tools">${p.tools.map(t => `<span class="tool">${t}</span>`).join('')}</span>`;
 const facts = p => `<span class="facts">
   <span class="fact"><span class="fact-k">Project</span><span class="fact-v">${p.project}</span></span>
@@ -175,17 +197,23 @@ $('#list').innerHTML = projects.map((p, i) => `
     </span></span>
   </button>`).join('');
 
-$('#prev').innerHTML = projects.map((p, i) => `
-  <div class="frame${i === 0 ? ' on' : ''}" data-i="${i}">${
-    p.images.length > 1
-      ? `<div class="carousel">
-           <div class="ctrack">${p.images.map((src, n) => `<div class="cslide-wrap${n === 0 ? ' on' : ''}"><img class="cslide" src="/assets/img/${src}" alt="" data-n="${n}"></div>`).join('')}</div>
-           <button class="cnav prev" type="button" aria-label="Previous image">&lsaquo;</button>
-           <button class="cnav next" type="button" aria-label="Next image">&rsaquo;</button>
-           <div class="cdots">${p.images.map((_, n) => `<span class="cdot${n === 0 ? ' on' : ''}" data-n="${n}"></span>`).join('')}</div>
-         </div>`
-      : `<div class="art ${p.art}" data-src="/assets/img/${p.images[0]}"></div>`
-  }</div>`).join('');
+$('#prev').innerHTML = projects.map((p, i) => {
+  const media = mediaOf(p);
+  const slide = (s, n) => s.type === 'video'
+    ? videoTag('cslide', s, ` data-n="${n}"`)
+    : `<img class="cslide" src="/assets/img/${s.src}" alt="" data-n="${n}">`;
+  const inner = media.length > 1
+    ? `<div class="carousel">
+         <div class="ctrack">${media.map((s, n) => `<div class="cslide-wrap${n === 0 ? ' on' : ''}">${slide(s, n)}</div>`).join('')}</div>
+         <button class="cnav prev" type="button" aria-label="Previous image">&lsaquo;</button>
+         <button class="cnav next" type="button" aria-label="Next image">&rsaquo;</button>
+         <div class="cdots">${media.map((_, n) => `<span class="cdot${n === 0 ? ' on' : ''}" data-n="${n}"></span>`).join('')}</div>
+       </div>`
+    : media[0].type === 'video'
+      ? videoTag(`art ${p.art}`, media[0])
+      : `<div class="art ${p.art}" data-src="/assets/img/${media[0].src}"></div>`;
+  return `<div class="frame${i === 0 ? ' on' : ''}" data-i="${i}">${inner}</div>`;
+}).join('');
 
 $('#bands').innerHTML = projects.map((p, i) => `
   <button class="band" type="button" data-i="${i}" style="--pa:${p.ink}">
@@ -198,6 +226,19 @@ $('#bands').innerHTML = projects.map((p, i) => `
       ${tools(p)}
     </span></span>
   </button>`).join('');
+
+// autoplay attributes alone are enough almost everywhere, but a couple of
+// browsers only honour the muted *property* (not the attribute) before
+// they'll allow a programmatic-looking play() — setting both, then kicking
+// play() ourselves, covers the gap without waiting on layout/visibility.
+// prefers-reduced-motion gets native controls and no forced playback instead
+// — same spirit as every other motion cut in this file, just here it's a
+// real HTMLMediaElement rather than a CSS animation to switch off.
+document.querySelectorAll('video[autoplay]').forEach(v => {
+  if (reduce) { v.removeAttribute('autoplay'); v.loop = false; v.controls = true; return; }
+  v.muted = true;
+  v.play().catch(() => {});
+});
 
 const root    = document.documentElement;
 const split   = $('#work');
@@ -466,7 +507,9 @@ const refreshers = [];
 
 frames.forEach(frame => {
   const art = frame.querySelector('.art');
-  if (art) art.addEventListener('click', () => openLightbox(art.dataset.src));
+  // a video .art has no data-src (nothing to open uncropped) — openLightbox
+  // no-ops on a falsy src anyway, but the tagName check keeps intent clear
+  if (art && art.tagName !== 'VIDEO') art.addEventListener('click', () => openLightbox(art.dataset.src));
 
   const track = frame.querySelector('.ctrack');
   const slides = [...frame.querySelectorAll('.cslide')];
@@ -490,8 +533,12 @@ frames.forEach(frame => {
   show(0);
   refreshers.push(() => show(cur));
   // a slide's rendered width is 0 until its image data arrives, so an
-  // offset summed before that finishes needs redoing once it lands
-  slides.forEach(s => s.addEventListener('load', () => show(cur)));
+  // offset summed before that finishes needs redoing once it lands —
+  // video slides fire loadedmetadata instead of load for that same signal
+  slides.forEach(s => {
+    s.addEventListener('load', () => show(cur));
+    s.addEventListener('loadedmetadata', () => show(cur));
+  });
 
   frame.querySelector('.cnav.prev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); });
   frame.querySelector('.cnav.next').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); });
@@ -502,7 +549,9 @@ frames.forEach(frame => {
   slides.forEach(s => {
     s.addEventListener('click', () => {
       const n = +s.dataset.n;
-      if (n === cur) openLightbox(s.currentSrc || s.src);
+      // a current video slide is already playing — nothing to "look closer"
+      // at, and the lightbox is image-only, so only stills open it
+      if (n === cur) { if (s.tagName !== 'VIDEO') openLightbox(s.currentSrc || s.src); }
       else show(n);
     });
   });
@@ -575,8 +624,13 @@ function layout() {
     // so the box matches the art/carousel exactly — carousels use the same
     // single ratio as a single-image project rather than their own natural
     // size, so cropping (cover) is consistent and the box never has to
-    // re-measure per slide
-    const cap = openIndex >= 0 ? innerHeight * 0.78 : innerHeight - 110;
+    // re-measure per slide. On a landscape phone that ratio-derived height
+    // routinely exceeds the (short) viewport — rather than capping it and
+    // cover-cropping into the image, let it run full height: centerPreview()
+    // already centres it on the viewport middle and clamps within the split,
+    // so the excess just becomes something to scroll up/down into, uncropped
+    const cap = landscapePhone.matches ? Infinity
+      : openIndex >= 0 ? innerHeight * 0.78 : innerHeight - 110;
     const w = prev.getBoundingClientRect().width || split.clientWidth * (openIndex >= 0 ? 0.66 : 0.44);
     const idx = openIndex >= 0 ? openIndex : previewIndex;
     const h = w / projects[idx].ratio;
@@ -613,6 +667,7 @@ function applyMode() {
 }
 narrowW.addEventListener('change', applyMode);
 portraitO.addEventListener('change', applyMode);
+landscapePhone.addEventListener('change', layout);
 applyMode();
 
 // title+bio entrance: starts at opacity 0 in main.css so the very first
