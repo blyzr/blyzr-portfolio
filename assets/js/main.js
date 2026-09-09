@@ -39,6 +39,7 @@ const projects = [
     tools:['Illustrator','Photoshop'] },
   { name:'MikFlix', kind:'Site', year:'19', art:'a3', ink:'#c0392b', ratio:1.2,
     images:['mikflix-wordmark.png','mikflix-hero.webp','mikflix-overview.webp','mikflix-majorlazer.webp','mikflix-cyberpunk.webp'],
+    link:'https://mikhailmehra.com',
     blurb:'Designed, then built. Live seven years.',
     project:'Director\u2019s portfolio site.', deliverables:'Custom WordPress theme, thumbnail system, client guide.', skills:'Web design, front-end build.',
     tools:['Photoshop','Illustrator','WordPress'] },
@@ -124,6 +125,14 @@ const gallery = p => {
   }</span>`;
 };
 const tools = p => `<span class="tools">${p.tools.map(t => `<span class="tool">${t}</span>`).join('')}</span>`;
+// a real <a> here would be invalid HTML (interactive content nested inside
+// the row/band's own <button>) and browsers get click/keyboard semantics
+// unpredictable about it — same reason .cdot etc. below are spans with a
+// listener rather than buttons. data-href + a delegated click/keydown
+// (wired further down, once these are in the DOM) opens it instead.
+const projectLink = p => p.link
+  ? `<span class="row-link" role="link" tabindex="0" data-href="${p.link}">${p.linkLabel || 'View live site'} ↗</span>`
+  : '';
 const facts = p => `<span class="facts">
   <span class="fact"><span class="fact-k">Project</span><span class="fact-v">${p.project}</span></span>
   <span class="fact"><span class="fact-k">Deliverables</span><span class="fact-v">${p.deliverables}</span></span>
@@ -189,6 +198,8 @@ $('#list').innerHTML = projects.map((p, i) => `
     <span class="detail"><span class="detail-in">
       ${facts(p)}
       ${tools(p)}
+      ${projectLink(p)}
+      <span class="row-back" role="button" tabindex="0">&larr; Back to index</span>
     </span></span>
   </button>`).join('');
 
@@ -219,6 +230,7 @@ $('#bands').innerHTML = projects.map((p, i) => `
       ${gallery(p)}
       ${facts(p)}
       ${tools(p)}
+      ${projectLink(p)}
     </span></span>
   </button>`).join('');
 
@@ -233,6 +245,23 @@ document.querySelectorAll('video[autoplay]').forEach(v => {
   if (reduce) { v.removeAttribute('autoplay'); v.loop = false; v.controls = true; return; }
   v.muted = true;
   v.play().catch(() => {});
+});
+
+// .row-link opens a project's live site. window.open (rather than a real
+// <a target="_blank">) because a real anchor would be interactive content
+// nested inside the row/band's own <button> — invalid HTML, and browsers'
+// click/keyboard handling of it is unreliable. Clearing .opener matches
+// what rel="noopener" would do on a real link.
+document.querySelectorAll('.row-link').forEach(el => {
+  const open = () => {
+    const w = window.open(el.dataset.href, '_blank', 'noopener,noreferrer');
+    if (w) w.opener = null;
+  };
+  el.addEventListener('click', e => { e.stopPropagation(); open(); });
+  el.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault(); e.stopPropagation(); open();
+  });
 });
 
 const root    = document.documentElement;
@@ -442,6 +471,17 @@ rows.forEach(row => {
   row.addEventListener('click', () => openIndex === i ? closeProject() : openProject(i));
 });
 $('#back').addEventListener('click', closeProject);
+// same "back to index" action, repeated at the bottom of each row's own
+// detail — now that opening a row scrolls it to viewport centre (see
+// centerRow above), the #back button up at the top of .panel can land well
+// off-screen, with nothing in view to close the row you're looking at
+document.querySelectorAll('.row-back').forEach(el => {
+  el.addEventListener('click', e => { e.stopPropagation(); closeProject(); });
+  el.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault(); e.stopPropagation(); closeProject();
+  });
+});
 addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (!lightbox.hidden) return closeLightbox();

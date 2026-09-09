@@ -268,6 +268,32 @@ is subtracted back out first when it sits above the newly-clicked row, since
 closing it will pull everything below back up by that amount. Only fires on
 open (clicking through projects), not on close.
 
+## Row inset, back-to-index, project links (2026-09-09)
+
+`.row:hover,.row.live` added `padding-right` to match its existing
+`padding-left` — the left-side padding was already there (also making room
+for `::before`'s accent bar), but with no right-side counterpart the title
+gained breathing room from the edge on open/hover while the year/kind on
+the right stayed flush against it, an inset that only ever showed on one
+side.
+
+Now that opening a row scrolls it to viewport centre (see "Desktop row
+centring" above), the existing `#back` button at the top of `.panel` can
+land off-screen above a row opened deep in the list — nothing visible to
+close it with. Each row's own `.detail` now ends with a `.row-back` span
+doing the same `closeProject()`.
+
+A project can carry a `link` (and optional `linkLabel`, default "View live
+site") to its actual live site — `projectLink()` renders it in both the
+desktop row and mobile band detail. MikFlix is the first: linked to
+`mikhailmehra.com`, the director's site it actually is. Both `.row-back` and
+`.row-link` are `<span role="…" tabindex="0">`, not a real `<button>`/`<a>`
+— either would be interactive content nested inside the row/band's own
+`<button>`, which is invalid HTML with unreliable click/keyboard behaviour
+in practice. `.row-link` opens via `window.open(..., '_blank', 'noopener,
+noreferrer')` and clears `.opener` after, which is what a real
+`target="_blank" rel="noopener noreferrer"` link would do.
+
 ## Still to do
 
 - Case study pages behind "See full case study" — the link is styled but dead

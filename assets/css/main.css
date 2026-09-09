@@ -270,7 +270,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   font-size:10px;letter-spacing:.11em;text-transform:uppercase;
   color:var(--muted);transition:color .35s;
 }
-.row:hover,.row.live{padding-left:var(--s3);
+/* padding-right mirrors padding-left: without it the open/hovered row's
+   title gained breathing room on the left (also making space for ::before)
+   while the year/kind on the right stayed flush against the same edge —
+   the two sides read as unevenly inset */
+.row:hover,.row.live{padding-left:var(--s3);padding-right:var(--s3);
   background:color-mix(in srgb,var(--pa) 8%,transparent)}
 .row:hover::before,.row.live::before{transform:scaleY(1)}
 .row:hover .row-name,.row.live .row-name{color:var(--pa);opacity:1}
@@ -287,6 +291,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .detail-in{overflow:hidden;min-height:0}
 .row.live .detail{grid-template-rows:1fr;opacity:1}
 .tools{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+
+/* spans, not <a>/<button> — they sit inside the row/band's own <button>,
+   where a second layer of interactive content is invalid HTML. Styled to
+   read as a link/button anyway; main.js wires the click and Enter/Space. */
+.row-link,.row-back{
+  display:inline-block;margin-top:var(--s4);cursor:pointer;
+  font-variation-settings:"MONO" 1;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;transition:color .25s;
+}
+.row-link{color:var(--pa)}
+.row-link:hover,.row-link:focus-visible{color:var(--accent)}
+.row-back{display:block;color:var(--muted)}
+.row-back:hover,.row-back:focus-visible{color:var(--accent)}
+.row-link:focus-visible,.row-back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tool{
   font-variation-settings:"MONO" 1;font-size:10px;letter-spacing:.09em;
   text-transform:uppercase;color:var(--pa);
