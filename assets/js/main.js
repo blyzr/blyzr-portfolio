@@ -434,6 +434,9 @@ function fadeByDistance() {
 // closing row's height are read before that transition has gone anywhere,
 // so the sum is a same-tick estimate of where the row will end up once its
 // own open animation finishes, not a value that fights it partway through.
+// returns the scrollY it's animating the page toward, rather than just
+// firing the scroll — openProject needs that target, not the current
+// scrollY, to position .prev correctly (see the comment on centerPreview)
 function centerRow(row, closing) {
   const detailH = row.querySelector('.detail-in').scrollHeight;
   const r = row.getBoundingClientRect();
@@ -441,8 +444,9 @@ function centerRow(row, closing) {
   if (closing && closing !== row && closing.getBoundingClientRect().top < r.top) {
     top -= closing.querySelector('.detail-in').scrollHeight;
   }
-  scrollTo({ top: Math.max(0, top + (r.height + detailH) / 2 - innerHeight / 2),
-             behavior: reduce ? 'auto' : 'smooth' });
+  const target = Math.max(0, top + (r.height + detailH) / 2 - innerHeight / 2);
+  scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+  return target;
 }
 
 function openProject(i) {
@@ -452,8 +456,11 @@ function openProject(i) {
   split.classList.add('open');
   rows.forEach(r => r.classList.toggle('live', +r.dataset.i === i));
   fadeByDistance();
-  layout();
-  centerRow(rows[i], closing);
+  // centerRow's scroll is what the page is about to animate to — layout()
+  // needs that target, not today's scrollY, to place .prev where it will
+  // actually sit once the scroll (and, if a row was already open, the
+  // resulting jump) settles, rather than where it sits this instant
+  layout(centerRow(rows[i], closing));
 }
 
 function closeProject() {
@@ -670,8 +677,13 @@ document.querySelectorAll('a[href="#contact"], a[href="#contact-m"]').forEach(a 
 contactFx.addEventListener('click', closeContactFx);
 emailFx.addEventListener('click', closeContactFx); // mailto: still navigates via the default action
 
-/* --- layout ------------------------------------------------------------- */
-function layout() {
+/* --- layout ---------------------------------------------------------------
+   targetScrollY: the scrollY the page is about to animate to, when known
+   (openProject passes centerRow's own target through here) — see the
+   comment on centerPreview for why this matters and defaults to today's
+   live scrollY otherwise (resize, closing, initial load: nothing is about
+   to scroll the row list, so "today's" is also "the eventual" position). */
+function layout(targetScrollY = scrollY) {
   // the reading zone sits partway down, so the sheet needs runway left below it
   $('#specTail').style.height = Math.round(innerHeight * (1 - READING_ZONE)) + 'px';
   if (!mobile) {
@@ -690,7 +702,7 @@ function layout() {
     const idx = openIndex >= 0 ? openIndex : previewIndex;
     const h = w / projects[idx].ratio;
     prev.style.height = Math.round(h) + 'px';
-    if (openIndex >= 0) centerPreview();
+    if (openIndex >= 0) centerPreview(targetScrollY);
     // frame width just changed along with prev's own box — every open
     // carousel's slide width/translateX (both in px, not %) needs redoing
     refreshers.forEach(fn => fn());
@@ -702,11 +714,25 @@ function layout() {
 // than chasing whichever row was just clicked — a fixed target regardless
 // of row index means switching between open rows no longer visibly shifts
 // the image down to meet the row (recomputed on each open/switch/resize,
-// same as the rest of layout(), not tracked continuously during scroll)
-function centerPreview() {
+// same as the rest of layout(), not tracked continuously during scroll).
+//
+// getBoundingClientRect() is viewport-relative, so splitRect.top already
+// bakes in whatever scrollY happens to be *right now* — fine when nothing
+// is scrolling, wrong the instant something is: clicking a row without
+// returning to index first fires centerRow's page-scroll and this in the
+// same tick, before that scroll has gone anywhere. Computed against the
+// stale, pre-scroll splitRect.top, the result would be correct for a
+// scroll position the page is about to leave, not the one it's headed to
+// — on a project whose box towers over the viewport (NightOwl's portrait
+// ratio far more than most), that mismatch is the difference between
+// "centred on the row" and "just parked somewhere in the whole column."
+// targetScrollY (passed in from layout(), sourced from centerRow's return
+// value) sidesteps needing the scroll to actually finish: shift by the
+// delta between where the page will end up and where it is this instant.
+function centerPreview(targetScrollY = scrollY) {
   const splitRect = split.getBoundingClientRect();
   const prevH     = prev.getBoundingClientRect().height;
-  const viewportMidLocal = innerHeight / 2 - splitRect.top;
+  const viewportMidLocal = innerHeight / 2 - splitRect.top + (targetScrollY - scrollY);
   const maxTop    = Math.max(0, splitRect.height - prevH);
   const top       = Math.max(0, Math.min(viewportMidLocal - prevH / 2, maxTop));
   prev.style.transform = `translateY(${Math.round(top)}px)`;

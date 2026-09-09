@@ -294,6 +294,31 @@ in practice. `.row-link` opens via `window.open(..., '_blank', 'noopener,
 noreferrer')` and clears `.opener` after, which is what a real
 `target="_blank" rel="noopener noreferrer"` link would do.
 
+## Preview centring while clicking through rows (2026-09-09)
+
+`centerPreview()` reads `split.getBoundingClientRect()`, which is
+viewport-relative — its `.top` already bakes in whatever `scrollY` happens
+to be *right now*. That's fine only when nothing is about to scroll. Opening
+a row without going back to the index first fires two things in the same
+tick: `centerRow()` kicks off the page's own scroll toward the newly-clicked
+row, and `layout()` → `centerPreview()` positions `.prev`'s `translateY` —
+computed against the *pre-scroll* `splitRect.top`, a value the page is
+about to leave. On a modestly-sized box the resulting offset was small
+enough to miss; on NightOwl, whose portrait ratio makes its box far taller
+than most, it was the difference between "centred on the row" and "parked
+somewhere in the whole column" — worse the more rows you'd clicked through
+without returning to index, since each click's stale reading compounded
+whatever the previous one left mid-flight.
+
+Fixed by not depending on live `scrollY` at all: `centerRow()` now returns
+the `scrollY` it's animating the page *toward*, and `openProject()` threads
+that straight into `layout(targetScrollY)` → `centerPreview(targetScrollY)`,
+which folds `targetScrollY - scrollY` into its viewport-middle calculation.
+The box is positioned for where the page will end up, computed in the same
+synchronous tick as the scroll request — it doesn't matter whether that
+scroll's smooth animation has started, finished, or gotten interrupted by
+another row-click queuing a new one before it settles.
+
 ## Still to do
 
 - Case study pages behind "See full case study" — the link is styled but dead
