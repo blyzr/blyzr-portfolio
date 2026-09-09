@@ -11,11 +11,6 @@ const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const narrowW = matchMedia('(max-width: 860px)');
 const portraitO = matchMedia('(orientation: portrait)');
 const isMobile = () => narrowW.matches && portraitO.matches;
-// matches the CSS landscape-phone breakpoint below — a rotated phone still
-// gets the desktop split/preview, but its viewport is short, so the usual
-// innerHeight-based cap on the preview (see layout()) would crop hard into
-// exactly the images that most need their full height
-const landscapePhone = matchMedia('(orientation: landscape) and (max-width: 900px)');
 
 const TILT = 1.0;
 const MOBILE_TILT = 1.45;
@@ -68,7 +63,7 @@ const projects = [
     project:'Broadcast ident.', deliverables:'30-second animated open.', skills:'Motion design, simulation.',
     tools:['Cinema 4D','After Effects'] },
   { name:'Kronan', kind:'Artwork', year:'21', art:'a5', ink:'#a86a4e', ratio:1.0,
-    images:['kronan.webp'],
+    images:['kronan.webp','kronan-2.webp','kronan-3.webp'],
     blurb:'Three covers, one series.',
     project:'Three-cover EP series.', deliverables:'Cover artwork \u00d7 3.', skills:'Illustration, series design.',
     tools:['Illustrator','Photoshop','Cinema 4D'] },
@@ -641,20 +636,20 @@ function layout() {
   $('#specTail').style.height = Math.round(innerHeight * (1 - READING_ZONE)) + 'px';
   if (!mobile) {
     // height follows the preview's own width at the showing project's ratio,
-    // so the box matches the art/carousel exactly — carousels use the same
-    // single ratio as a single-image project rather than their own natural
-    // size, so cropping (cover) is consistent and the box never has to
-    // re-measure per slide. On a landscape phone that ratio-derived height
-    // routinely exceeds the (short) viewport — rather than capping it and
-    // cover-cropping into the image, let it run full height: centerPreview()
-    // already centres it on the viewport middle and clamps within the split,
-    // so the excess just becomes something to scroll up/down into, uncropped
-    const cap = landscapePhone.matches ? Infinity
-      : openIndex >= 0 ? innerHeight * 0.78 : innerHeight - 110;
+    // so the box matches the art/carousel exactly and nothing is cropped —
+    // carousels use the same single ratio as a single-image project rather
+    // than their own natural size, so cropping (cover) stays consistent
+    // across slides and the box never has to re-measure per slide. This
+    // used to be capped to a fraction of innerHeight, cover-cropping into
+    // whichever image that cut into — square and portrait ratios on a short
+    // viewport (a laptop window, a landscape phone) hit it easily. No cap
+    // now: centerPreview() already centres the box on the viewport middle
+    // and clamps within the split, so any excess becomes something to
+    // scroll up/down into, uncropped, rather than something to crop away.
     const w = prev.getBoundingClientRect().width || split.clientWidth * (openIndex >= 0 ? 0.66 : 0.44);
     const idx = openIndex >= 0 ? openIndex : previewIndex;
     const h = w / projects[idx].ratio;
-    prev.style.height = Math.round(Math.min(h, cap)) + 'px';
+    prev.style.height = Math.round(h) + 'px';
     if (openIndex >= 0) centerPreview();
     // frame width just changed along with prev's own box — every open
     // carousel's slide width/translateX (both in px, not %) needs redoing
@@ -687,7 +682,6 @@ function applyMode() {
 }
 narrowW.addEventListener('change', applyMode);
 portraitO.addEventListener('change', applyMode);
-landscapePhone.addEventListener('change', layout);
 applyMode();
 
 // title+bio entrance: starts at opacity 0 in main.css so the very first

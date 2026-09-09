@@ -87,22 +87,29 @@ background, cover-cropped. All WebP, capped at 1400px, ~1.6MB for the set.
 | `.a1` | Dewlora | own prerender, widened to 3:2 with a blurred fill so the open preview crops gradient, not product |
 | `.a2` | Trü Spray | embroidered mockup, cropped off page 2 of `TruSprayLogoMockups.pdf` |
 | `.a4` | Good Hands | identity sheet |
-| `.a5` | Kronan | `kronan_01` |
 | `.a6` | Chris Emery | album cover |
 | `.a7` | Discrete | album cover |
 | `.a8` | TapTec | packaging mockup — logo lockup + real production boxes in one frame |
 | `.a9` | Min Reid | pitch pack cover, page 1 at 150dpi |
-| `.a10` | HITTIT | title frame at t=6s |
+| `.a10` | HITTIT | title frame at t=6s — now the poster behind its video, see "Video slides" below |
 | `.a11` | Koru | own render |
 
 A project with more than one image (MikFlix, Min Reid, X&G, NightOwl, Pangea
-Survival, Allie Nixon) skips `.art` entirely and renders as a `.carousel`
-instead — one slide visible at a time (also cover-cropped, to the same
-project `ratio` an `.art` div would use), with nav arrows/dots. `.a3`, `.a12`,
-`.a13`, `.a14`, `.a15` are unused art slots: each still has an `art:'aN'`
-field in `main.js` for shape-consistency with the other project objects, but
-nothing reads it once a project has more than one image, so there's no
-matching rule in `main.css`.
+Survival, Allie Nixon, Kronan) skips `.art` entirely and renders as a
+`.carousel` instead — one slide visible at a time (also cover-cropped, to
+the same project `ratio` an `.art` div would use), with nav arrows/dots.
+`.a3`, `.a5`, `.a12`, `.a13`, `.a14`, `.a15` are unused art slots: each
+still has an `art:'aN'` field in `main.js` for shape-consistency with the
+other project objects, but nothing reads it once a project has more than
+one image, so there's no matching rule in `main.css`.
+
+**Kronan (2026-09-09):** was showing only `kronan_01` despite the copy
+always having said "Three covers, one series" — the other two covers
+(`kronan_02`, `kronan_03`, same `/opt/portfolio-src/05_Kronan_EP_Artwork`
+source as the first) were just never brought in. Added as `kronan-2.webp`
+and `kronan-3.webp`, same 1400px-cap WebP conversion as everything else;
+`kronan.webp` (the original `kronan_01` export) is unchanged and stays
+slide one.
 
 **Behance backfill (2026-09-09):** four early projects pulled in from
 `behance.net/blayzereid` — X&G Neon Sign Animation, NightOwl Mobile App
@@ -147,17 +154,18 @@ matching how the non-multi (desktop-row and single-image-band) gallery
 already behaved — portrait shots (phone screens, Behance stills) no longer
 lose their top and bottom to a landscape-shaped box.
 
-## Landscape-phone preview height (2026-09-09)
+## Preview height, no more viewport cap (2026-09-09)
 
-A landscape phone gets the desktop split/preview (see "Two layouts" above),
-but its viewport is short. `layout()` used to cap the preview's height to a
-fraction of `innerHeight`, which cover-cropped hard into exactly the tall
-images that most needed room. `landscapePhone` (a matchMedia mirroring the
-CSS's own `orientation:landscape and max-width:900px` breakpoint) now lifts
-that cap to `Infinity` there instead — `centerPreview()` already centres the
-box on the viewport's vertical middle and clamps it within `.split`, so the
-extra height just becomes something to scroll up or down into, uncropped,
-rather than something to crop away.
+`layout()` used to cap the preview's ratio-derived height to a fraction of
+`innerHeight` — first spotted on a landscape phone's short viewport, but the
+same cap cover-cropped square (`ratio:1.0`, e.g. Discrete, Kronan, Chris
+Emery) and portrait images on an ordinary desktop too, any time the open
+panel's width made its ratio-derived height taller than that fraction of the
+browser window. The cap is gone outright now, on every viewport: the box is
+always exactly `width / ratio`, so nothing is ever cover-cropped away to fit
+a height it was never sized for. `centerPreview()` already centres the box
+on the viewport's vertical middle and clamps it within `.split`, so any
+excess just becomes something to scroll up or down into, uncropped.
 
 Multi-image or not, a click on the image opens it uncropped in the lightbox
 (`#lightbox` in `index.html`) — that's the escape hatch for whatever cover
