@@ -244,6 +244,22 @@ product line's turnover without claiming the redesign caused it. The sales ramp
 predates the redesign, so "designed the enclosure for a line doing $3M" is
 supportable and anything causal is not.
 
+## Desktop row centring (2026-09-09)
+
+Opening a row used to just expand its `.detail` in place, wherever that
+landed on screen — on a long list that could open well outside the visible
+area with nothing to bring it into view. `centerRow()` mirrors the mobile
+`centreBand()` pattern (same file) but targets true viewport centre rather
+than the mobile loupe's fixed `READING_ZONE`: it reads the clicked row's
+`getBoundingClientRect()` and its `.detail-in`'s `scrollHeight` in the same
+tick the `.live` class is added — before the 0.7s grid-template-rows
+transition has moved anything — so the sum is an estimate of where the row
+will end up once fully open, not a value computed mid-transition that would
+fight it. If another row was already open, its own `.detail-in.scrollHeight`
+is subtracted back out first when it sits above the newly-clicked row, since
+closing it will pull everything below back up by that amount. Only fires on
+open (clicking through projects), not on close.
+
 ## Still to do
 
 - Case study pages behind "See full case study" — the link is styled but dead

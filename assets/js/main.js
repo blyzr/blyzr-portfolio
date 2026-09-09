@@ -403,13 +403,33 @@ function fadeByDistance() {
   });
 }
 
+// same idea as centreBand below, but targeting true viewport centre rather
+// than the mobile loupe's fixed reading zone — there's no loupe here.
+// detailH comes from scrollHeight (the natural, fully-open content height)
+// rather than the still-mid-transition rendered height, and both r and the
+// closing row's height are read before that transition has gone anywhere,
+// so the sum is a same-tick estimate of where the row will end up once its
+// own open animation finishes, not a value that fights it partway through.
+function centerRow(row, closing) {
+  const detailH = row.querySelector('.detail-in').scrollHeight;
+  const r = row.getBoundingClientRect();
+  let top = r.top + scrollY;
+  if (closing && closing !== row && closing.getBoundingClientRect().top < r.top) {
+    top -= closing.querySelector('.detail-in').scrollHeight;
+  }
+  scrollTo({ top: Math.max(0, top + (r.height + detailH) / 2 - innerHeight / 2),
+             behavior: reduce ? 'auto' : 'smooth' });
+}
+
 function openProject(i) {
+  const closing = openIndex >= 0 ? rows[openIndex] : null;
   openIndex = i;
   showPreview(i);
   split.classList.add('open');
   rows.forEach(r => r.classList.toggle('live', +r.dataset.i === i));
   fadeByDistance();
   layout();
+  centerRow(rows[i], closing);
 }
 
 function closeProject() {
