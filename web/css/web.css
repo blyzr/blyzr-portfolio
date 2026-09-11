@@ -152,5 +152,11 @@
   .expand-overlay{padding:0}
   .expand-panel{flex-direction:column;width:100%;aspect-ratio:auto;max-height:100%;height:100%;border-radius:0}
   .expand-details{order:2;flex:0 0 auto;width:100%;height:auto;max-height:40vh;border-right:0;border-top:1px solid var(--edge)}
-  .expand-frame-col{order:1;flex:1 1 auto}
+  /* height:100% (set for the desktop row layout, where it means "fill
+     the row's height") fights flex:1 1 auto here — in a column layout
+     it means "100% of the whole panel", which flex-basis:auto then
+     takes as its starting size before shrinking to share space with
+     .expand-details, rather than just growing/shrinking to fill
+     whatever's actually left over */
+  .expand-frame-col{order:1;flex:1 1 auto;height:auto}
 }
