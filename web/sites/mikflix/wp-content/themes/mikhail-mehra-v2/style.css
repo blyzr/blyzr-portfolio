@@ -1815,7 +1815,8 @@ body.loading div#loader {
 }
 .hero-title {
     position: absolute !important;
-    bottom: 46%;
+    top: 50%;
+    transform: translateY(-50%);
     color: white;
     font-family: "Lato", Helvetica, Arial, sans-serif;
     line-height: 4rem;
