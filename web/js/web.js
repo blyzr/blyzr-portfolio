@@ -37,19 +37,9 @@ grid.innerHTML = sites.map(s => `
 
 const cards = [...grid.querySelectorAll('.site-card')];
 
-/* thumbnails render at a real 1440x900 desktop viewport, then scale down to
-   whatever width the grid actually gives the card — recomputed on resize
-   since the grid is responsive (2 cols -> 1 col on narrow viewports) */
-function layoutThumbs() {
-  cards.forEach(card => {
-    const wrap = card.querySelector('.thumb-wrap');
-    const scale = card.querySelector('.thumb-scale');
-    const w = wrap.getBoundingClientRect().width;
-    scale.style.transform = `scale(${(w / DESKTOP.w).toFixed(4)})`;
-  });
-}
-addEventListener('resize', layoutThumbs, { passive:true });
-layoutThumbs();
+/* thumbnails render at a real 1440x900 desktop viewport, scaled down to fit
+   the card via a CSS container query (see .thumb-scale in web.css) — no JS
+   sizing here, so there's nothing to go stale on resize/reflow. */
 
 /* lazy-load: only point a thumbnail iframe at its real src once the card is
    actually near the viewport — four full page loads (one of them a whole
@@ -83,20 +73,17 @@ const vpToggle  = $('#viewportToggle');
 let currentVp = DESKTOP;
 let openCard = null;
 
-function fitScale(vp) {
-  const w = frameWrap.clientWidth, h = frameWrap.clientHeight;
-  return Math.min(w / vp.w, h / vp.h);
-}
+/* the actual fit-to-frame scaling is a CSS container query on .expand-scale
+   (see web.css) — this just tells CSS which real device size to target via
+   --vw/--vh, so there's no JS measurement to go stale on resize/reflow. */
 function applyViewport(vp, animate) {
   currentVp = vp;
-  scaleEl.style.transition = animate ? '' : 'none';
-  scaleEl.style.width  = vp.w + 'px';
-  scaleEl.style.height = vp.h + 'px';
-  scaleEl.style.transform = `scale(${fitScale(vp).toFixed(4)})`;
-  if (!animate) void scaleEl.offsetWidth; // flush before re-enabling transitions elsewhere
+  if (!animate) scaleEl.style.transition = 'none';
+  frameWrap.style.setProperty('--vw', vp.w + 'px');
+  frameWrap.style.setProperty('--vh', vp.h + 'px');
+  if (!animate) { void scaleEl.offsetWidth; scaleEl.style.transition = ''; }
   vpToggle.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.vp === (vp === MOBILE ? 'mobile' : 'desktop')));
 }
-addEventListener('resize', () => { if (!overlay.hidden) applyViewport(currentVp, false); }, { passive:true });
 vpToggle.addEventListener('click', e => {
   const btn = e.target.closest('button[data-vp]');
   if (!btn) return;

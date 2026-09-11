@@ -238,7 +238,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .filter .arr{font-size:11px;transition:transform .25s}
 .filter-web:hover .arr{transform:translate(1px,-1px)}
 
-.is-hidden{display:none}
+/* compound selectors, not a bare .is-hidden{display:none} — .row and .band
+   both set their own display:block later in this file, and a bare single-
+   class .is-hidden would tie with them on specificity and lose on source
+   order, never actually hiding anything */
+.row.is-hidden,.band.is-hidden{display:none}
 
 .panel{
   flex:1 1 56%;min-width:0;border-radius:var(--r2);

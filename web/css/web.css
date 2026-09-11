@@ -22,13 +22,14 @@
 
 /* --- grid ----------------------------------------------------------------- */
 .web-grid{
-  display:grid;grid-template-columns:1fr;gap:var(--s7);
+  display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s7);
   padding:0 var(--gut) var(--s9);
 }
 .site-card{
   --pa:var(--accent);
-  display:block;width:100%;text-align:left;border-radius:var(--r2);overflow:hidden;
+  display:block;width:100%;text-align:left;border-radius:var(--r2);
   background:var(--surface);border:1px solid var(--edge);cursor:pointer;
+  padding:var(--s5);
   transition:border-color .3s,transform .3s cubic-bezier(.2,.85,.24,1);
 }
 .site-card:hover{border-color:color-mix(in srgb,var(--pa) 45%,var(--edge));transform:translateY(-2px)}
@@ -37,21 +38,31 @@
 
 .thumb-wrap{
   position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#0a0a0a;
-  border-bottom:1px solid var(--edge);
+  border-radius:var(--r1);container-type:inline-size;
 }
+/* scale is pure CSS (container query units), not JS reading
+   getBoundingClientRect() on load/resize — a container query recalculates
+   on any layout change (column-count flip, font-swap reflow, zoom) with no
+   risk of going stale the way a one-shot/resize-listener JS measurement
+   can. length/length division in calc() yields a unitless number, which is
+   exactly what scale() needs — 100cqw and 1440px are both lengths. */
 .thumb-scale{
   position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:top left;
+  transform:scale(calc(100cqw / 1440px));
   pointer-events:none;
 }
 .thumb-scale iframe{width:1440px;height:900px;border:0;display:block;background:#fff}
 .thumb-fade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(15,15,15,.35) 100%)}
 
-.card-meta{padding:var(--s5)}
+.card-meta{padding:var(--s5) 0 0}
 .card-meta h3{margin:0 0 4px;font-size:19px;font-weight:400;letter-spacing:-.014em;color:var(--text)}
 .card-sub{margin:0 0 var(--s3);font-size:12.5px;color:var(--subtle);line-height:1.4}
 .card-tags{display:flex;flex-wrap:wrap;gap:var(--s2)}
 .card-tags .tool{font-size:9.5px}
 
+@media (max-width:900px){
+  .web-grid{grid-template-columns:1fr}
+}
 @media (max-width:520px){
   .web-hero{padding:var(--s7) var(--gut) var(--s5)}
   .web-hero h1{font-size:36px}
@@ -99,9 +110,20 @@
 .viewport-toggle button.on{background:var(--accent);color:#fff}
 .viewport-toggle button:hover:not(.on){color:var(--text)}
 
-.expand-frame-wrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
+/* container-type:size (not inline-size) gives both cqw and cqh, so the
+   min(...) below can do a real "fit contain" — the frame wrap's own size
+   comes from flex:1 in a flex column, a definite extrinsic size, which is
+   what container-type:size requires. --vw/--vh are the only things JS
+   sets (see applyViewport in web.js); CSS does the actual fit-scaling
+   reactively, so there's nothing that can go stale on resize/reflow. */
+.expand-frame-wrap{
+  flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  container-type:size;--vw:1440px;--vh:900px;
+}
 .expand-scale{
-  transform-origin:top left;transition:transform .4s cubic-bezier(.2,.85,.24,1),width .4s cubic-bezier(.2,.85,.24,1);
+  width:var(--vw);height:var(--vh);transform-origin:top left;
+  transform:scale(min(calc(100cqw / var(--vw)), calc(100cqh / var(--vh))));
+  transition:transform .4s cubic-bezier(.2,.85,.24,1),width .4s cubic-bezier(.2,.85,.24,1);
   box-shadow:0 0 0 1px rgba(232,230,225,.08);
 }
 .expand-scale iframe{display:block;width:100%;height:100%;border:0;background:#fff}
