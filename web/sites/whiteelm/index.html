@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>White Elm — The Only Bag You'll Ever Need</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Encode+Sans+Expanded:wght@500;700;900&family=Tenor+Sans&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brown:#5b371d; --cream:#f1efe8; --ink:#131313; --gold:#d3b269;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:'Tenor Sans',sans-serif;font-size:17px;line-height:1.5}
+h1,h2,h3{font-family:'Encode Sans Expanded',sans-serif;font-weight:900;margin:0;letter-spacing:-.01em}
+p{margin:0}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+
+.btn{
+  display:inline-flex;align-items:center;gap:10px;padding:15px 34px;border-radius:100px;
+  font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--brown);cursor:pointer;transition:transform .15s ease,background .2s;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-brown{background:var(--brown);color:#fff}
+.btn-brown:hover{background:#4a2c16}
+.btn-cream{background:var(--cream);color:var(--brown);border-color:var(--cream)}
+.btn-cream:hover{background:#e6e2d6}
+.btn-outline-light{background:transparent;color:#fff;border-color:#fff}
+.btn-outline-light:hover{background:#fff;color:var(--brown)}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;padding:20px 28px}
+.logo{font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:20px;letter-spacing:.02em}
+.nav-links{display:flex;gap:30px;list-style:none;margin:0;padding:0;font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
+.nav-links a:hover{color:var(--brown);text-decoration:underline}
+.nav-cta{display:flex;align-items:center;gap:20px;font-family:'Inter',sans-serif;font-size:13px;text-transform:uppercase;font-weight:500}
+.burger{display:none;background:none;border:0;cursor:pointer}
+.burger span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0}
+
+/* hero */
+.hero{position:relative;min-height:88vh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;overflow:hidden;background:var(--cream)}
+.hero-copy{position:relative;z-index:2;padding:0 6% 0 8%}
+.hero-copy .kicker{font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--brown);margin-bottom:18px;display:block}
+.hero-copy h1{font-size:clamp(34px,4.6vw,58px);line-height:1.05;color:var(--brown);margin-bottom:16px}
+.hero-copy .sub{font-size:22px;color:var(--ink);max-width:20ch;margin-bottom:26px}
+.hero-figure{position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.hero-figure img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
+.hero-figure img.bag{position:relative;z-index:1;max-height:78vh;width:auto;margin:0 auto;border-radius:10px;box-shadow:0 30px 70px rgba(19,19,19,.25)}
+
+/* intro */
+.intro{padding:90px 28px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto}
+.intro img{border-radius:60px}
+.intro h2{font-size:clamp(30px,3.6vw,44px);color:var(--brown);margin-bottom:18px}
+.intro p{color:#3a332c;font-size:19px;max-width:40ch}
+
+/* feature rows */
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;padding:70px 28px;max-width:1200px;margin:0 auto}
+.feature-row.rev{grid-template-columns:1fr 1fr}
+.feature-row.rev .ftext{order:2}
+.feature-row img{border-radius:50px;width:100%}
+.ftext h2{font-size:clamp(28px,3.4vw,40px);color:var(--brown);margin-bottom:16px}
+.ftext p{color:#3a332c;font-size:19px;max-width:42ch}
+.tint{background:var(--cream)}
+
+/* cta band */
+.band{background:var(--brown);color:var(--cream);text-align:center;padding:70px 24px}
+.band h2{font-size:clamp(26px,3.6vw,42px);max-width:20ch;margin:0 auto}
+
+/* testimonials */
+.testi-head{text-align:center;padding:80px 28px 10px;max-width:600px;margin:0 auto}
+.testi-head h2{font-size:clamp(28px,3.6vw,42px);color:var(--brown)}
+.testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1200px;margin:40px auto 90px;padding:0 28px}
+.testi{display:flex;flex-direction:column;gap:14px}
+.testi .shot{border-radius:40px;overflow:hidden;aspect-ratio:3/4}
+.testi .shot img{width:100%;height:100%;object-fit:cover}
+.testi h3{font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:20px;color:var(--brown)}
+.stars{color:var(--gold);font-size:16px;letter-spacing:2px}
+.testi p{color:#3a332c;font-size:16px}
+
+/* final cta */
+.final{position:relative;min-height:50vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.final img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.final::after{content:"";position:absolute;inset:0;background:rgba(19,19,19,.55);z-index:0}
+.final-copy{position:relative;z-index:1;color:#fff;padding:0 24px}
+.final-copy h2{font-size:clamp(30px,4.4vw,52px);color:#fff;margin-bottom:24px;max-width:16ch}
+
+footer{background:var(--ink);color:var(--cream);padding:56px 28px 28px}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding-bottom:34px;border-bottom:1px solid rgba(241,239,232,.15)}
+.foot-grid .logo{color:#fff;font-family:'Encode Sans Expanded';font-weight:900;font-size:20px;margin-bottom:14px;display:block}
+.foot-grid p{color:#b7b0a3;font-size:15px;max-width:34ch}
+.foot-grid h4{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.foot-grid ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px;color:#d9d4c9}
+.foot-bottom{text-align:center;padding-top:22px;font-size:12.5px;color:#948c7e;font-family:'Inter',sans-serif}
+
+@media (max-width:940px){
+  .hero{grid-template-columns:1fr;text-align:center}
+  .hero-copy{padding:60px 24px 20px}
+  .hero-copy .sub{margin-left:auto;margin-right:auto}
+  .hero-figure{height:52vh}
+  .nav-links{display:none}
+  .burger{display:block}
+  .intro{grid-template-columns:1fr}
+  .feature-row,.feature-row.rev{grid-template-columns:1fr}
+  .feature-row.rev .ftext{order:0}
+  .testimonials{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .intro,.feature-row{padding:50px 18px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="logo" href="#">WHITE ELM</a>
+    <ul class="nav-links">
+      <li><a href="#shop">Shop</a></li>
+      <li><a href="#story">Our Story</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+    </ul>
+    <div class="nav-cta"><a href="#">Bag (0)</a></div>
+    <button class="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-copy">
+    <span class="kicker">Gemini Convertible Backpack</span>
+    <h1>The Only Bag You'll Ever Need</h1>
+    <p class="sub">Perfect for any girl on-the-go.</p>
+    <a class="btn btn-brown" href="#shop">Shop Now</a>
+  </div>
+  <div class="hero-figure">
+    <img class="bg" src="img/hero-bg.webp" alt="">
+    <img class="bag" src="img/hero-bag.webp" alt="Gemini Convertible Backpack">
+  </div>
+</header>
+
+<section class="intro" id="story">
+  <img src="img/lifestyle-1.webp" alt="">
+  <div>
+    <h2>Designed For Women By Women</h2>
+    <p>Dedicated to empowering modern-day women with multifunctional and versatile bags that seamlessly blend organization and style.</p>
+  </div>
+</section>
+
+<div class="band"><h2>Why White Elm Will Be Your New Everyday Companion</h2></div>
+
+<div class="feature-row" id="shop">
+  <img src="img/lifestyle-2.webp" alt="">
+  <div class="ftext">
+    <h2>Pack Like A Pro</h2>
+    <p>Designed with versatile storage to keep you organized, no matter your lifestyle.</p>
+  </div>
+</div>
+
+<div class="feature-row rev tint">
+  <img src="img/lifestyle-3.webp" alt="">
+  <div class="ftext">
+    <h2>Travel In Style</h2>
+    <p>Designed with a pocket that converts into a travel sleeve, with just one zip. White Elm will be your new favourite companion, no matter where you are in the world.</p>
+  </div>
+</div>
+
+<div class="feature-row">
+  <img src="img/lifestyle-4.webp" alt="">
+  <div class="ftext">
+    <h2>Ultimate Versatility</h2>
+    <p>Designed to effortlessly adapt to your lifestyle needs. With a multitude of wearing styles, it can go from work to play in seconds.</p>
+  </div>
+</div>
+
+<div class="testi-head" id="reviews">
+  <h2>Loved By Thousands Of Happy Women</h2>
+</div>
+<div class="testimonials">
+  <div class="testi">
+    <div class="shot"><img src="img/testimonial-1.webp" alt=""></div>
+    <h3>Lauren B.</h3>
+    <span class="stars">★★★★★</span>
+    <p>"I bought the Gemini bag, and it's a perfect fit for my laptop, planner, keys, wallet, binder and lunch. It carries it all and is absolutely beautiful with any outfit!"</p>
+  </div>
+  <div class="testi">
+    <div class="shot"><img src="img/testimonial-2.webp" alt=""></div>
+    <h3>Kayla</h3>
+    <span class="stars">★★★★★</span>
+    <p>"I just adore this bag! I received it today (very fast with shipping) and I cannot wait to use it! I am absolutely in love. It's even more gorgeous in person!"</p>
+  </div>
+  <div class="testi">
+    <div class="shot"><img src="img/testimonial-3.webp" alt=""></div>
+    <h3>Jocelyn I.</h3>
+    <span class="stars">★★★★★</span>
+    <p>"All of my folders, manuals and 2 big Yeti cups, plus much more fits in this bag. It's the perfect professional looking bag. I LOVE it!"</p>
+  </div>
+</div>
+
+<div class="final">
+  <img src="img/cta-bg.webp" alt="">
+  <div class="final-copy">
+    <h2>The Only Bag You'll Ever Need</h2>
+    <a class="btn btn-outline-light" href="#shop">Shop Now</a>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-grid">
+    <div>
+      <span class="logo">WHITE ELM</span>
+      <p>Multifunctional, versatile bags designed for women by women. shopwhiteelm.com</p>
+    </div>
+    <div>
+      <h4>Shop</h4>
+      <ul><li><a href="#shop">Gemini Backpack</a></li><li><a href="#shop">All Bags</a></li><li><a href="#shop">New In</a></li></ul>
+    </div>
+    <div>
+      <h4>Support</h4>
+      <ul><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul>
+    </div>
+  </div>
+  <p class="foot-bottom">© White Elm. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

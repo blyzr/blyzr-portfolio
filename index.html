@@ -37,11 +37,21 @@
   </section>
 
   <section class="split" id="work">
-    <div class="panel" id="panel">
-      <button class="back" id="back" type="button">&larr; Back to index</button>
-      <div class="list" id="list"></div>
+    <div class="filters">
+      <button class="filter on" type="button" data-cat="all">All</button>
+      <button class="filter" type="button" data-cat="identity">Identity</button>
+      <button class="filter" type="button" data-cat="visual">Visual</button>
+      <button class="filter" type="button" data-cat="motion">Motion Design</button>
+      <button class="filter" type="button" data-cat="product">Product Design</button>
+      <a class="filter filter-web" href="/web/">Web<span class="arr" aria-hidden="true">&#8599;</span></a>
     </div>
-    <div class="prev" id="prev"></div>
+    <div class="split-row">
+      <div class="panel" id="panel">
+        <button class="back" id="back" type="button">&larr; Back to index</button>
+        <div class="list" id="list"></div>
+      </div>
+      <div class="prev" id="prev"></div>
+    </div>
   </section>
 
   <footer class="pg" id="contact"><a class="contact-email" href="mailto:hello@bpjr.xyz">hello@bpjr.xyz</a> · Oxfordshire, UK</footer>
@@ -62,7 +72,17 @@
 
   <div class="spec-mark dockfx" id="fxSpec" aria-hidden="true"><span class="livemark">br<i class="dot">.</i></span></div>
 
-  <div id="work-m"><div id="bands"></div></div>
+  <div id="work-m">
+    <div class="filters filters-m">
+      <button class="filter on" type="button" data-cat="all">All</button>
+      <button class="filter" type="button" data-cat="identity">Identity</button>
+      <button class="filter" type="button" data-cat="visual">Visual</button>
+      <button class="filter" type="button" data-cat="motion">Motion Design</button>
+      <button class="filter" type="button" data-cat="product">Product Design</button>
+      <a class="filter filter-web" href="/web/">Web<span class="arr" aria-hidden="true">&#8599;</span></a>
+    </div>
+    <div id="bands"></div>
+  </div>
   <footer class="pg" id="contact-m"><a class="contact-email" href="mailto:hello@bpjr.xyz">hello@bpjr.xyz</a></footer>
   <div id="specTail" aria-hidden="true"></div>
 </main>

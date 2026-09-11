@@ -1,0 +1,168 @@
+(() => {
+'use strict';
+
+const sites = [
+  { slug:'mikflix', name:'MikFlix', kicker:'01 · WordPress site', sub:'Director’s portfolio site.',
+    blurb:'Designed, then built. Live seven years. Homepage carousel and project thumbnails are the real, live interactions — this is the actual local site, not a recording of it.',
+    tags:['WordPress','PHP','MySQL','JS'], ink:'#c0392b', link:'https://mikhailmehra.com' },
+  { slug:'syntra', name:'Syntra', kicker:'02 · SaaS landing page', sub:'Shopify growth subscription, coded from a Figma design.',
+    blurb:'A pricing-led landing page for a Shopify CRO/design subscription — built faithfully from the source Figma file, real breakpoints included.',
+    tags:['HTML','CSS','JS'], ink:'#557143' },
+  { slug:'blossom', name:'Blossom Perfumery', kicker:'03 · Storefront homepage', sub:'Designer-inspired fragrance, elevated from an email template.',
+    blurb:'The source Figma file was a promo email, not a homepage — this is a full storefront built around its product photography and brand voice.',
+    tags:['HTML','CSS','JS'], ink:'#c79a3d' },
+  { slug:'whiteelm', name:'White Elm', kicker:'04 · Storefront homepage', sub:'Convertible bag brand, elevated from an email template.',
+    blurb:'Same story as Blossom — the Figma source was an email campaign, rebuilt here as a proper homepage around its own photography and copy.',
+    tags:['HTML','CSS','JS'], ink:'#5b371d' },
+];
+
+const $ = sel => document.querySelector(sel);
+const DESKTOP = { w:1440, h:900 };
+const MOBILE  = { w:390,  h:844 };
+
+/* --- grid markup ----------------------------------------------------------- */
+const grid = $('#webGrid');
+grid.innerHTML = sites.map(s => `
+  <button class="site-card" type="button" data-slug="${s.slug}" style="--pa:${s.ink}">
+    <span class="thumb-wrap">
+      <span class="thumb-scale"><iframe data-src="/web/sites/${s.slug}/index.html" tabindex="-1" aria-hidden="true" loading="lazy"></iframe></span>
+      <span class="thumb-fade" aria-hidden="true"></span>
+    </span>
+    <span class="card-meta">
+      <h3>${s.name}</h3>
+      <span class="card-sub">${s.sub}</span>
+      <span class="card-tags tools">${s.tags.map(t => `<span class="tool">${t}</span>`).join('')}</span>
+    </span>
+  </button>`).join('');
+
+const cards = [...grid.querySelectorAll('.site-card')];
+
+/* thumbnails render at a real 1440x900 desktop viewport, then scale down to
+   whatever width the grid actually gives the card — recomputed on resize
+   since the grid is responsive (2 cols -> 1 col on narrow viewports) */
+function layoutThumbs() {
+  cards.forEach(card => {
+    const wrap = card.querySelector('.thumb-wrap');
+    const scale = card.querySelector('.thumb-scale');
+    const w = wrap.getBoundingClientRect().width;
+    scale.style.transform = `scale(${(w / DESKTOP.w).toFixed(4)})`;
+  });
+}
+addEventListener('resize', layoutThumbs, { passive:true });
+layoutThumbs();
+
+/* lazy-load: only point a thumbnail iframe at its real src once the card is
+   actually near the viewport — four full page loads (one of them a whole
+   WordPress mirror) up front isn't worth it for cards nobody scrolled to */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const iframe = entry.target.querySelector('.thumb-scale iframe');
+    if (iframe.dataset.src) { iframe.src = iframe.dataset.src; delete iframe.dataset.src; }
+    io.unobserve(entry.target);
+  });
+}, { rootMargin:'400px' });
+cards.forEach(card => io.observe(card));
+
+/* --- expand overlay ---------------------------------------------------------
+   FLIP: the panel always lives at its final resting size/position (centred
+   by the overlay's flex layout). Opening reads the clicked card's rect,
+   maps the panel's natural rect back onto it with an instant transform, then
+   clears that transform on the next frame so the browser tweens the whole
+   translate+scale back to identity — the panel visibly grows out of the
+   thumbnail it was clicked from. Closing runs the same math in reverse.
+   The inner .expand-scale carries a *separate* scale (real device width ->
+   however wide the frame column actually is) for the desktop/mobile toggle,
+   independent of this open/close transform. */
+const overlay   = $('#expandOverlay');
+const panel     = $('#expandPanel');
+const frameWrap = $('#expandFrameWrap');
+const scaleEl   = $('#expandScale');
+const iframe    = $('#expandFrame');
+const vpToggle  = $('#viewportToggle');
+let currentVp = DESKTOP;
+let openCard = null;
+
+function fitScale(vp) {
+  const w = frameWrap.clientWidth, h = frameWrap.clientHeight;
+  return Math.min(w / vp.w, h / vp.h);
+}
+function applyViewport(vp, animate) {
+  currentVp = vp;
+  scaleEl.style.transition = animate ? '' : 'none';
+  scaleEl.style.width  = vp.w + 'px';
+  scaleEl.style.height = vp.h + 'px';
+  scaleEl.style.transform = `scale(${fitScale(vp).toFixed(4)})`;
+  if (!animate) void scaleEl.offsetWidth; // flush before re-enabling transitions elsewhere
+  vpToggle.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.vp === (vp === MOBILE ? 'mobile' : 'desktop')));
+}
+addEventListener('resize', () => { if (!overlay.hidden) applyViewport(currentVp, false); }, { passive:true });
+vpToggle.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-vp]');
+  if (!btn) return;
+  applyViewport(btn.dataset.vp === 'mobile' ? MOBILE : DESKTOP, true);
+});
+
+function flipFrom(rect) {
+  const last = panel.getBoundingClientRect();
+  const dx = rect.left - last.left, dy = rect.top - last.top;
+  const sx = rect.width / last.width, sy = rect.height / last.height;
+  return `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
+}
+
+function openSite(card) {
+  const slug = card.dataset.slug;
+  const site = sites.find(s => s.slug === slug);
+  if (!site) return;
+  openCard = card;
+
+  $('#edKicker').textContent = site.kicker;
+  $('#edTitle').textContent = site.name;
+  $('#edSub').textContent = site.sub;
+  $('#edBlurb').textContent = site.blurb;
+  $('#edTags').innerHTML = site.tags.map(t => `<span class="tool">${t}</span>`).join('');
+  panel.style.setProperty('--pa', site.ink);
+  const link = $('#edLink');
+  if (site.link) { link.href = site.link; link.hidden = false; } else { link.hidden = true; }
+
+  overlay.hidden = false;
+  iframe.src = `/web/sites/${slug}/index.html`;
+  applyViewport(DESKTOP, false);
+
+  const startRect = card.querySelector('.thumb-wrap').getBoundingClientRect();
+  panel.classList.remove('animating');
+  panel.style.transform = flipFrom(startRect);
+  void panel.offsetWidth; // flush the start transform before animating away from it
+  requestAnimationFrame(() => {
+    overlay.classList.add('on');
+    panel.classList.add('animating');
+    panel.style.transform = 'none';
+  });
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSite() {
+  if (overlay.hidden) return;
+  const card = openCard;
+  overlay.classList.remove('on');
+  document.body.style.overflow = '';
+  if (card) {
+    const rect = card.querySelector('.thumb-wrap').getBoundingClientRect();
+    panel.classList.add('animating');
+    panel.style.transform = flipFrom(rect);
+  }
+  setTimeout(() => {
+    overlay.hidden = true;
+    panel.classList.remove('animating');
+    panel.style.transform = '';
+    iframe.src = 'about:blank';
+    openCard = null;
+  }, 560);
+}
+
+cards.forEach(card => card.addEventListener('click', () => openSite(card)));
+$('#expandClose').addEventListener('click', closeSite);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeSite(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeSite(); });
+
+})();

@@ -1,0 +1,131 @@
+/* ============================= WEB SHOWCASE =============================
+   Page-specific styles layered on top of /assets/css/main.css's tokens
+   (--base/--text/--accent/--s*/--gut/--hdh etc). This page has no cursor-
+   light or header-dock JS running (no main.js here) so .hd is just a plain
+   sticky opaque bar rather than the animated dock main.css assumes. */
+
+.web-hd{
+  background:rgba(15,15,15,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--edge);
+}
+.web-mark{font-size:17px;font-weight:600;letter-spacing:-.03em}
+.web-mark .dot{color:var(--accent);font-style:normal}
+
+.web-hero{padding:var(--s8) var(--gut) var(--s6);max-width:720px}
+.web-back{
+  display:inline-block;margin-bottom:var(--s5);font-variation-settings:"MONO" 1;font-size:10.5px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--muted);transition:color .25s;
+}
+.web-back:hover{color:var(--accent)}
+.web-hero h1{margin:0 0 var(--s4);font-size:48px;font-weight:600;letter-spacing:-.02em}
+.web-hero .sub{margin:0;max-width:56ch;color:var(--subtle);font-size:15px;line-height:1.6}
+
+/* --- grid ----------------------------------------------------------------- */
+.web-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s6);
+  padding:0 var(--gut) var(--s9);
+}
+.site-card{
+  --pa:var(--accent);
+  display:block;width:100%;text-align:left;border-radius:var(--r2);overflow:hidden;
+  background:var(--surface);border:1px solid var(--edge);cursor:pointer;
+  transition:border-color .3s,transform .3s cubic-bezier(.2,.85,.24,1);
+}
+.site-card:hover{border-color:color-mix(in srgb,var(--pa) 45%,var(--edge));transform:translateY(-2px)}
+.site-card:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.site-card.is-hidden{visibility:hidden}
+
+.thumb-wrap{
+  position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#0a0a0a;
+  border-bottom:1px solid var(--edge);
+}
+.thumb-scale{
+  position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:top left;
+  pointer-events:none;
+}
+.thumb-scale iframe{width:1440px;height:900px;border:0;display:block;background:#fff}
+.thumb-fade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(15,15,15,.35) 100%)}
+
+.card-meta{padding:var(--s5)}
+.card-meta h3{margin:0 0 4px;font-size:19px;font-weight:400;letter-spacing:-.014em;color:var(--text)}
+.card-sub{margin:0 0 var(--s3);font-size:12.5px;color:var(--subtle);line-height:1.4}
+.card-tags{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.card-tags .tool{font-size:9.5px}
+
+@media (max-width:900px){
+  .web-grid{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .web-hero{padding:var(--s7) var(--gut) var(--s5)}
+  .web-hero h1{font-size:36px}
+}
+
+/* --- expand overlay --------------------------------------------------------
+   the panel starts at final size/position; opening applies an inline
+   transform mapping it back onto the clicked card's rect, then clears that
+   transform on the next frame so the browser tweens it — a classic FLIP
+   (see openSite() in web.js). The inner .expand-scale carries its own
+   *separate* scale (real device width -> panel width) for the desktop/
+   mobile viewport toggle, independent of the outer open/close animation. */
+.expand-overlay{
+  position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+  padding:var(--s6);background:rgba(10,10,10,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);
+  transition:background .4s ease,backdrop-filter .4s ease;
+}
+.expand-overlay.on{background:rgba(10,10,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.expand-overlay[hidden]{display:none}
+
+.expand-panel{
+  position:relative;display:flex;gap:0;width:min(1180px,100%);height:min(760px,86vh);
+  background:var(--surface);border:1px solid var(--edge);border-radius:var(--r2);overflow:hidden;
+  transform-origin:top left;will-change:transform;box-shadow:0 40px 100px rgba(0,0,0,.5);
+}
+.expand-panel.animating{transition:transform .55s cubic-bezier(.2,.85,.24,1)}
+
+.expand-close{
+  position:absolute;top:var(--s4);right:var(--s4);z-index:5;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;
+  color:#fff;background:rgba(15,15,15,.55);border-radius:100px;transition:background .25s;
+}
+.expand-close:hover{background:rgba(15,15,15,.85)}
+
+.expand-frame-col{position:relative;flex:1 1 68%;min-width:0;background:#0a0a0a;display:flex;flex-direction:column}
+.viewport-toggle{
+  position:absolute;top:var(--s4);left:var(--s4);z-index:5;display:flex;gap:2px;
+  background:rgba(15,15,15,.6);border:1px solid rgba(232,230,225,.18);border-radius:100px;padding:3px;
+}
+.viewport-toggle button{
+  width:32px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:100px;
+  color:rgba(232,230,225,.55);transition:background .2s,color .2s;
+}
+.viewport-toggle button svg{width:16px;height:16px}
+.viewport-toggle button.on{background:var(--accent);color:#fff}
+.viewport-toggle button:hover:not(.on){color:var(--text)}
+
+.expand-frame-wrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.expand-scale{
+  transform-origin:top left;transition:transform .4s cubic-bezier(.2,.85,.24,1),width .4s cubic-bezier(.2,.85,.24,1);
+  box-shadow:0 0 0 1px rgba(232,230,225,.08);
+}
+.expand-scale iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+
+.expand-details{
+  flex:1 1 32%;min-width:220px;max-width:340px;padding:var(--s6) var(--s5);overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.ed-kicker{
+  font-variation-settings:"MONO" 1;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--pa,var(--accent));margin-bottom:var(--s3);
+}
+.expand-details h2{margin:0 0 var(--s3);font-size:26px;font-weight:400;letter-spacing:-.014em;color:var(--text)}
+.ed-sub{margin:0 0 var(--s3);font-size:13.5px;color:var(--subtle);line-height:1.5}
+.ed-blurb{margin:0 0 var(--s4);font-size:12.5px;color:var(--muted);line-height:1.5}
+.expand-details .tools{margin-bottom:var(--s4)}
+.expand-details .row-link{margin-top:auto}
+
+@media (max-width:860px){
+  .expand-overlay{padding:0}
+  .expand-panel{flex-direction:column;width:100%;height:100%;border-radius:0}
+  .expand-frame-col{flex:1 1 auto}
+  .expand-details{max-width:none;flex:0 0 auto;max-height:38vh}
+}

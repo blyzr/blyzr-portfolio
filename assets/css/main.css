@@ -213,7 +213,32 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dockfx .ln{display:block;width:max-content;will-change:transform}
 
 /* --- index list --------------------------------------------------------- */
-.split{display:flex;gap:var(--s5);padding:0 var(--gut) var(--s9);align-items:flex-start}
+.split{padding:0 var(--gut) var(--s9)}
+.split-row{display:flex;gap:var(--s5);align-items:flex-start}
+
+/* --- filters -------------------------------------------------------------
+   category chips above the list — filtering hides non-matching rows/bands
+   via .is-hidden (see setFilter in main.js) rather than re-rendering.
+   Web is a real <a>, not a toggle: it carries no data-cat so main.js's
+   selector skips it, and it just navigates to the standalone showcase. */
+.filters{display:flex;flex-wrap:wrap;gap:var(--s3);margin-bottom:var(--s5)}
+.filter{
+  display:inline-flex;align-items:center;gap:5px;
+  font-variation-settings:"MONO" 1;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--edge);border-radius:100px;
+  padding:var(--s2) var(--s4);cursor:pointer;
+  transition:color .25s,border-color .25s,background .25s;
+}
+.filter:hover{color:var(--text);border-color:color-mix(in srgb,var(--accent) 40%,var(--edge))}
+.filter.on{color:var(--base);background:var(--accent);border-color:var(--accent)}
+.filter:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filter-web{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.filter-web:hover{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.filter .arr{font-size:11px;transition:transform .25s}
+.filter-web:hover .arr{transform:translate(1px,-1px)}
+
+.is-hidden{display:none}
 
 .panel{
   flex:1 1 56%;min-width:0;border-radius:var(--r2);
@@ -434,6 +459,7 @@ video.art{width:100%;height:100%;object-fit:cover;display:block;cursor:default}
 }
 .spec-hero .sub{margin:var(--s5) auto 0;text-align:center;font-size:14px}
 .slot-spec{flex:0 0 auto;width:var(--s8)}
+.filters-m{padding:var(--s5) var(--gut) 0}
 .band{
   --pa:var(--accent); --l:0;
   position:relative;display:block;width:100%;
