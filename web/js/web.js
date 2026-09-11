@@ -3,7 +3,7 @@
 
 const sites = [
   { slug:'mikflix', name:'MikFlix', kicker:'01 · WordPress site', sub:'Director’s portfolio site.',
-    blurb:'Designed, then built. Live seven years. The homepage carousel and project thumbnails are the real, live interactions — this is the actual site, not a recording of it.',
+    blurb:'Designed, then built. Live seven years, running on a fully custom WordPress theme — the homepage carousel and project thumbnails are the real, live interactions.',
     tags:['WordPress','PHP','MySQL','JS'], ink:'#c0392b', link:'https://mikhailmehra.com' },
   { slug:'verdant', name:'Verdant', kicker:'02 · SaaS landing page', sub:'Shopify growth subscription — pricing-led landing page.',
     blurb:'A predictable-subscription pitch for a Shopify CRO and design agency, built around plans, process, and proof.',
