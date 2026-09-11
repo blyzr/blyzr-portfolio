@@ -20,11 +20,8 @@ const $ = sel => document.querySelector(sel);
 // a plain, realistic 16:10 desktop size — no longer hand-calibrated
 // against the panel's own geometry (that broke the instant the panel
 // wasn't exactly the one width it was calibrated for, which is most of
-// the time — confirmed by screenshots still showing a large empty gap).
-// .expand-frame-col's aspect-ratio now reads --vw/--vh directly (see
-// web.css), so the frame's own shape always matches whichever of these
-// is active instead of the other way around. 1280 clears every site's
-// own mobile breakpoint (820-940px) with real margin to spare.
+// the time). 1280 clears every site's own mobile breakpoint (820-940px)
+// with real margin to spare; h is a floor that fitScale() grows from.
 const DESKTOP = { w:1280, h:800 };
 const MOBILE  = { w:390,  h:844 };
 
@@ -62,32 +59,56 @@ const vpToggle  = $('#viewportToggle');
 let currentVp = DESKTOP;
 let openCard = null;
 
-/* the fit-to-frame scale is measured directly with getBoundingClientRect()
-   rather than computed in CSS (container queries, aspect-ratio) — three
-   different pure-CSS approaches here each broke in a different way once
-   the frame column was actually sized by flex-grow in a real layout
-   (row on desktop, column on mobile), so this just measures what the
-   frame wrap's real rendered box is and sets the scale to match, which
-   works the same regardless of how that box ended up that size. Called
-   right after overlay.hidden=false (openSite) or on a toggle click
-   (panel already open, transform already settled to none) — in both
-   cases .expand-panel carries no transform of its own at the moment
-   this runs (the FLIP transform is applied *after* this in openSite),
-   so the measured rect reflects true layout size, not a visually
-   shrunk/enlarged one. */
+/* The scale is measured from the frame wrap's real rendered box rather than
+   computed in CSS. This only works because .expand-scale is absolutely
+   positioned (see web.css): as a flex item it silently flex-shrank away
+   from --vw, so both the iframe's internal viewport and this calculation's
+   assumptions were wrong before anything here even ran.
+   Called right after overlay.hidden=false (openSite) or on a toggle click
+   (panel already open, transform settled) — in both cases .expand-panel
+   carries no transform of its own at the moment this runs (the FLIP
+   transform is applied *after* this in openSite), so the measured rect is
+   true layout size, not a visually shrunk/enlarged one. */
+// a 1280x1000 window is about as tall as a real desktop browser ever gets.
+// The simulated height is allowed to grow up to this to soak up leftover
+// frame height, but no further: every one of these sites uses 100vh
+// sections (MikFlix especially), and an unbounded viewport height would
+// stretch their heroes into something no real browser would ever show.
+const MAX_VH = 1000;
+
 function fitScale(vp, animate) {
   const rect = frameWrap.getBoundingClientRect();
-  const scale = (rect.width > 0 && rect.height > 0)
-    ? Math.min(rect.width / vp.w, rect.height / vp.h)
-    : 1;
+  if (!rect.width || !rect.height) return;
+
+  let scale, vh;
+  if (vp === MOBILE) {
+    // a phone has a fixed shape — fit the whole device in and centre it,
+    // rather than stretching it to whatever the frame happens to be
+    scale = Math.min(rect.width / vp.w, rect.height / vp.h);
+    vh = vp.h;
+  } else {
+    // desktop fills the frame's width exactly, then the simulated window
+    // grows taller (up to MAX_VH) to take up the leftover height, so the
+    // frame isn't left half empty
+    scale = rect.width / vp.w;
+    vh = Math.min(MAX_VH, Math.max(vp.h, rect.height / scale));
+  }
+  panel.style.setProperty('--vh', Math.round(vh) + 'px');
+
+  // the offsets are plain px in the *parent's* coordinate space, so they
+  // centre the scaled box correctly — a percentage translate, or letting
+  // flexbox do the centring, would position it using its pre-transform
+  // size (--vw/--vh) and drop it well outside the visible frame
+  const x = Math.max(0, (rect.width  - vp.w * scale) / 2);
+  const y = Math.max(0, (rect.height - vh    * scale) / 2);
+
   if (!animate) scaleEl.style.transition = 'none';
-  scaleEl.style.transform = `scale(${scale})`;
+  scaleEl.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
   if (!animate) { void scaleEl.offsetWidth; scaleEl.style.transition = ''; }
 }
 function applyViewport(vp, animate) {
   currentVp = vp;
   panel.style.setProperty('--vw', vp.w + 'px');
-  panel.style.setProperty('--vh', vp.h + 'px');
   fitScale(vp, animate);
   vpToggle.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.vp === (vp === MOBILE ? 'mobile' : 'desktop')));
 }
