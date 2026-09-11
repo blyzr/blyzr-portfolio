@@ -69,12 +69,14 @@ let openCard = null;
    carries no transform of its own at the moment this runs (the FLIP
    transform is applied *after* this in openSite), so the measured rect is
    true layout size, not a visually shrunk/enlarged one. */
-// a 1280x1000 window is about as tall as a real desktop browser ever gets.
-// The simulated height is allowed to grow up to this to soak up leftover
-// frame height, but no further: every one of these sites uses 100vh
-// sections (MikFlix especially), and an unbounded viewport height would
-// stretch their heroes into something no real browser would ever show.
-const MAX_VH = 1000;
+// The simulated window grows as tall as the frame needs so nothing is left
+// letterboxed, with a backstop: these sites all use 100vh sections (MikFlix
+// leans on them hard), and past a point a very tall window stops resembling
+// anything a real browser shows. 1.5x the width is deliberately generous —
+// it clears every frame shape this panel actually produces (a desktop frame
+// wants ~0.8x, a phone-shaped one ~1.4x), so in practice the height fills
+// exactly and this only catches pathological geometry.
+const MAX_VH_RATIO = 1.5;
 
 function fitScale(vp, animate) {
   const rect = frameWrap.getBoundingClientRect();
@@ -88,10 +90,10 @@ function fitScale(vp, animate) {
     vh = vp.h;
   } else {
     // desktop fills the frame's width exactly, then the simulated window
-    // grows taller (up to MAX_VH) to take up the leftover height, so the
-    // frame isn't left half empty
+    // grows taller to take up the leftover height, so the frame fills on
+    // both axes rather than sitting in a letterbox
     scale = rect.width / vp.w;
-    vh = Math.min(MAX_VH, Math.max(vp.h, rect.height / scale));
+    vh = Math.min(vp.w * MAX_VH_RATIO, Math.max(vp.h, rect.height / scale));
   }
   panel.style.setProperty('--vh', Math.round(vh) + 'px');
 
