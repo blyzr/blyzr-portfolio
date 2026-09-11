@@ -24,35 +24,16 @@ const MOBILE  = { w:390,  h:844 };
 const grid = $('#webGrid');
 grid.innerHTML = sites.map(s => `
   <button class="site-card" type="button" data-slug="${s.slug}" style="--pa:${s.ink}">
-    <span class="thumb-wrap">
-      <span class="thumb-scale"><iframe data-src="/web/sites/${s.slug}/index.html" tabindex="-1" aria-hidden="true" loading="lazy"></iframe></span>
-      <span class="thumb-fade" aria-hidden="true"></span>
-    </span>
     <span class="card-meta">
+      <span class="ed-kicker">${s.kicker}</span>
       <h3>${s.name}</h3>
       <span class="card-sub">${s.sub}</span>
+      <span class="card-blurb">${s.blurb}</span>
       <span class="card-tags tools">${s.tags.map(t => `<span class="tool">${t}</span>`).join('')}</span>
     </span>
   </button>`).join('');
 
 const cards = [...grid.querySelectorAll('.site-card')];
-
-/* thumbnails render at a real 1440x900 desktop viewport, scaled down to fit
-   the card via a CSS container query (see .thumb-scale in web.css) — no JS
-   sizing here, so there's nothing to go stale on resize/reflow. */
-
-/* lazy-load: only point a thumbnail iframe at its real src once the card is
-   actually near the viewport — four full page loads (one of them a whole
-   WordPress mirror) up front isn't worth it for cards nobody scrolled to */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    const iframe = entry.target.querySelector('.thumb-scale iframe');
-    if (iframe.dataset.src) { iframe.src = iframe.dataset.src; delete iframe.dataset.src; }
-    io.unobserve(entry.target);
-  });
-}, { rootMargin:'400px' });
-cards.forEach(card => io.observe(card));
 
 /* --- expand overlay ---------------------------------------------------------
    FLIP: the panel always lives at its final resting size/position (centred
@@ -60,7 +41,7 @@ cards.forEach(card => io.observe(card));
    maps the panel's natural rect back onto it with an instant transform, then
    clears that transform on the next frame so the browser tweens the whole
    translate+scale back to identity — the panel visibly grows out of the
-   thumbnail it was clicked from. Closing runs the same math in reverse.
+   card it was clicked from. Closing runs the same math in reverse.
    The inner .expand-scale carries a *separate* scale (real device width ->
    however wide the frame column actually is) for the desktop/mobile toggle,
    independent of this open/close transform. */
@@ -116,7 +97,7 @@ function openSite(card) {
   iframe.src = `/web/sites/${slug}/index.html`;
   applyViewport(DESKTOP, false);
 
-  const startRect = card.querySelector('.thumb-wrap').getBoundingClientRect();
+  const startRect = card.getBoundingClientRect();
   panel.classList.remove('animating');
   panel.style.transform = flipFrom(startRect);
   void panel.offsetWidth; // flush the start transform before animating away from it
@@ -134,7 +115,7 @@ function closeSite() {
   overlay.classList.remove('on');
   document.body.style.overflow = '';
   if (card) {
-    const rect = card.querySelector('.thumb-wrap').getBoundingClientRect();
+    const rect = card.getBoundingClientRect();
     panel.classList.add('animating');
     panel.style.transform = flipFrom(rect);
   }
