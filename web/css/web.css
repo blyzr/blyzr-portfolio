@@ -121,11 +121,16 @@
 /* the scale transform on .expand-scale is set directly by fitScale() in
    web.js (getBoundingClientRect() on this wrap vs. the real device size
    in --vw/--vh) rather than computed in CSS — see the comment on
-   .expand-panel for why. Top-aligned, not centered: a real browser
-   starts at the page's own top rather than floating the viewport around
-   the page's vertical middle. */
+   .expand-panel for why. Top-left aligned, not centered: flexbox centers
+   a transformed child using its *unscaled* layout size (1280/390px wide,
+   since scale() doesn't change layout size) — so justify-content:center
+   here was centering the full-size box first and only then shrinking it
+   around its own corner, leaving a small off-center sliver visible
+   inside the clipped wrap instead of a flush, full-width frame. flex-
+   start on both axes always means "0 offset" regardless of the child's
+   size, so it isn't affected the same way. */
 .expand-frame-wrap{
-  position:absolute;inset:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
+  position:absolute;inset:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:flex-start;
 }
 .expand-scale{
   width:var(--vw);height:var(--vh);transform-origin:top left;

@@ -108,7 +108,7 @@ function flipFrom(rect) {
   return `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
 }
 
-function openSite(card) {
+function openSite(card, fromPopstate) {
   const slug = card.dataset.slug;
   const site = sites.find(s => s.slug === slug);
   if (!site) return;
@@ -149,9 +149,15 @@ function openSite(card) {
     panel.style.transform = 'none';
   });
   document.body.style.overflow = 'hidden';
+
+  // a fake #slug entry so the back button reads as "leave this card" rather
+  // than "leave /web entirely" — skipped when we're here *because* of a
+  // popstate (browser back/forward already moved us, pushing again would
+  // just add a duplicate entry on top of the one the user just landed on)
+  if (!fromPopstate) history.pushState({ slug }, '', '#' + slug);
 }
 
-function closeSite() {
+function closeSite(fromPopstate) {
   if (overlay.hidden) return;
   const card = openCard;
   overlay.classList.remove('on');
@@ -168,12 +174,32 @@ function closeSite() {
     iframe.src = 'about:blank';
     openCard = null;
   }, 560);
+  // closing via the X/backdrop/Escape should consume the fake #slug entry
+  // openSite() pushed, so a *later* real back press leaves /web rather than
+  // re-opening this same card. Popstate-driven closes skip this — the
+  // browser already moved history for us, calling back() again would just
+  // fire a second, unwanted navigation.
+  if (!fromPopstate && history.state && history.state.slug === card?.dataset.slug) {
+    history.back();
+  }
 }
 
 cards.forEach(card => card.addEventListener('click', () => openSite(card)));
-$('#expandClose').addEventListener('click', closeSite);
+$('#expandClose').addEventListener('click', () => closeSite());
 overlay.addEventListener('click', e => { if (e.target === overlay) closeSite(); });
 addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeSite(); });
+
+// browser back/forward through the fake #slug entries: back past one closes
+// the panel (landing back on the plain #-less /web/ URL), forward re-opens it
+addEventListener('popstate', e => {
+  const slug = e.state && e.state.slug;
+  if (slug) {
+    const card = cards.find(c => c.dataset.slug === slug);
+    if (card) openSite(card, true);
+  } else if (!overlay.hidden) {
+    closeSite(true);
+  }
+});
 
 /* --- header --------------------------------------------------------------
    matches home's docked-header look (main.css's .hd already reads
