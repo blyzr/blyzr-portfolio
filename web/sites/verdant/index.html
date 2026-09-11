@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verdant — Growth that compounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400..700;1,400..700&family=Darker+Grotesque:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#557143; --bright:#5e8e3e; --bg:#edf3ee; --white:#fff; --dark:#394138;
+  --gap:24px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--white);color:var(--ink);font-family:'Darker Grotesque',sans-serif;font-weight:500;font-size:18px;line-height:1.35}
+h1,h2,h3{font-family:'STIX Two Text',serif;font-weight:400;margin:0}
+p{margin:0}
+img{max-width:100%;display:block}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+a{color:inherit}
+
+.btn{
+  display:inline-flex;align-items:center;gap:10px;padding:12px 34px;border-radius:5px;
+  font-family:'Darker Grotesque',sans-serif;font-weight:700;font-size:16px;text-decoration:none;
+  border:0;cursor:pointer;transition:transform .15s ease, opacity .2s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--bright);color:#fff}
+.btn-primary:hover{background:#4d7b32}
+.btn-ghost{background:rgba(241,241,241,.2);color:#fff}
+.btn-ghost:hover{background:rgba(241,241,241,.32)}
+.btn-light{background:#fff;color:var(--ink)}
+.btn-light:hover{background:#f4f4f4}
+.btn svg{width:9px;height:9px}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(85,113,67,.12)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;padding:16px 24px}
+.logo{font-family:'STIX Two Text',serif;font-size:22px;color:var(--ink);text-decoration:none}
+.nav-links{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:16px;font-weight:600}
+.nav-links a{text-decoration:none;opacity:.85}
+.nav-links a:hover{opacity:1;color:var(--bright)}
+.nav-cta{display:flex}
+.burger{display:none;background:none;border:0;cursor:pointer;padding:6px}
+.burger span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0}
+
+/* hero */
+.hero{
+  position:relative;min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;text-align:center;padding:80px 24px;color:#fff;overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;inset:0;background:url("img/hero.webp") center/cover;z-index:0;
+}
+.hero::after{content:"";position:absolute;inset:0;background:var(--dark);opacity:.72;z-index:0}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:clamp(30px,4.2vw,48px);line-height:1.15;max-width:18ch}
+.hero p{max-width:42ch;opacity:.85;font-size:19px}
+.hero-btns{display:flex;gap:15px;flex-wrap:wrap;justify-content:center}
+.trust{display:flex;align-items:center;gap:8px;font-weight:600;opacity:.85;margin-top:6px}
+
+/* section frame */
+.intro{text-align:center;max-width:600px;margin:0 auto;padding:70px 24px 10px;display:flex;flex-direction:column;gap:16px}
+.eyebrow{font-size:30px;font-weight:600;color:var(--ink)}
+.intro h2, .section h2.headline{font-size:clamp(26px,3.4vw,42px)}
+.section{padding:56px 24px}
+.section.tint{background:var(--bg)}
+
+/* section 1 feature cards — icon+heading+copy on top, the real feature
+   image below via .card-img (the icon is a small 55x55 glyph; the feature
+   image is a full-width photo/illustration, not the same asset scaled down) */
+.cards-1{display:flex;flex-direction:column;gap:20px;max-width:1020px;margin:44px auto 0}
+.card{background:var(--bg);border:1px solid var(--ink);border-radius:10px;padding:40px;display:flex;flex-direction:column;gap:24px}
+.card-row{display:flex;flex-direction:column;gap:24px}
+.card-row.split{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.feat-top{display:flex;gap:17px;align-items:flex-start}
+.feat-icon{width:55px;height:55px;flex:none;border-radius:8px;object-fit:cover}
+.feat-text h3{font-size:30px;font-weight:600;margin-bottom:6px}
+.feat-text p{opacity:.9}
+.card-img{border-radius:8px;overflow:hidden}
+.card-img img{width:100%;height:auto;display:block}
+
+/* section 2 grid — hand-drawn line icons, one per benefit, same stroke
+   style throughout rather than reused Figma raster thumbnails */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;max-width:1040px;margin:40px auto 0}
+.benefit{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px}
+.benefit svg{width:44px;height:44px;color:var(--ink)}
+.benefit h3{font-size:28px;font-weight:600}
+.benefit p{opacity:.9;font-size:17px}
+.center-btn{text-align:center;margin-top:36px}
+
+/* process */
+.process{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;max-width:1040px;margin:36px auto 0}
+.step h3{font-size:26px;font-weight:600;margin-bottom:10px}
+.step p{opacity:.9;font-size:16px}
+
+/* section4 */
+.quote-card{max-width:1040px;margin:0 auto;background:#fff;border:1px solid var(--ink);border-radius:10px;padding:50px 34px;text-align:left}
+.quote-card q{font-family:'STIX Two Text',serif;font-size:clamp(22px,2.6vw,32px);display:block;margin-bottom:20px;line-height:1.3}
+.quote-card cite{font-style:normal;font-weight:600;font-size:24px}
+.collab{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1040px;margin:40px auto 0}
+.collab .num{font-size:64px;font-weight:600;line-height:1;margin-bottom:6px}
+.collab h3{font-size:26px;font-weight:600;margin-bottom:8px}
+.collab p{opacity:.9;font-size:16px}
+
+/* plans */
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:1020px;margin:30px auto 0}
+.chip{background:var(--bg);border-radius:5px;padding:7px 19px;font-size:16px}
+.chip.more{background:var(--ink);color:var(--bg)}
+.cta-banner{
+  max-width:1020px;margin:40px auto 0;border-radius:10px;overflow:hidden;position:relative;
+  padding:30px 24px;color:#fff;
+}
+.cta-banner::before{content:"";position:absolute;inset:0;background:url("img/cta-bg.webp") center/cover;z-index:0}
+.cta-banner::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:0}
+.cta-banner>*{position:relative;z-index:1}
+.cta-banner h2{font-size:clamp(24px,3vw,32px);margin-bottom:20px}
+.cta-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+  border:1px solid #fff;border-radius:10px;background:rgba(237,243,238,.1);padding:15px}
+.cta-inner h3{font-size:26px;font-weight:600;margin-bottom:6px}
+.cta-inner p{font-size:16px;opacity:.9}
+
+.pricing{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1020px;margin:40px auto 0}
+.plan{border-radius:10px;border:1px solid var(--ink);padding:40px 24px;display:flex;flex-direction:column;gap:20px}
+.plan.standard{background:var(--bg);color:var(--ink)}
+.plan.premium{background:var(--ink);color:var(--bg)}
+.plan h2{font-size:34px}
+.plan .price{font-size:20px;font-weight:500}
+.plan .desc{opacity:.85;font-size:16px}
+.plan h4{font-size:26px;font-weight:600;margin:0 0 10px}
+.plan ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.plan li{display:flex;align-items:center;gap:12px;font-size:16px}
+.plan li::before{content:"✓";flex:none;width:20px;height:20px;border-radius:50%;background:currentColor;
+  color:inherit;display:flex;align-items:center;justify-content:center;font-size:12px;
+  background:rgba(255,255,255,.15);}
+.plan.standard li::before{background:rgba(85,113,67,.12)}
+.plan .foot{text-align:center;font-size:15px;opacity:.85;margin-top:4px}
+
+/* faq */
+.faq-list{max-width:1040px;margin:36px auto 0;display:flex;flex-direction:column;gap:10px}
+.faq-item{background:var(--bg);border:1px solid var(--ink);border-radius:10px;overflow:hidden}
+.faq-q{width:100%;text-align:left;background:none;border:0;padding:20px 22px;display:flex;justify-content:space-between;
+  align-items:center;gap:16px;cursor:pointer;font-family:'Darker Grotesque',sans-serif;font-weight:600;font-size:20px;color:var(--ink)}
+.faq-q .chev{flex:none;width:12px;height:12px;transition:transform .25s ease}
+.faq-item.open .chev{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-a p{padding:0 22px 20px;opacity:.9;font-size:16px}
+.faq-item.open .faq-a{max-height:220px}
+.faq-foot{text-align:center;margin-top:30px;font-size:18px}
+.faq-foot a{color:var(--bright);font-weight:700;text-decoration:none}
+
+footer{background:var(--ink);color:var(--bg);padding:40px 24px;text-align:center;font-size:15px}
+footer .logo{color:#fff;display:block;margin-bottom:10px}
+footer a{opacity:.8;text-decoration:none}
+
+@media (max-width:820px){
+  .nav-links,.nav-cta{display:none}
+  .burger{display:block}
+  .card-row.split{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .process{grid-template-columns:1fr 1fr}
+  .collab{grid-template-columns:1fr}
+  .pricing{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .grid-3{grid-template-columns:1fr}
+  .process{grid-template-columns:1fr}
+  section,.section{padding:44px 18px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="logo" href="#">Verdant</a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#plans">Plans</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta"><a class="btn btn-primary" href="#plans">View plans</a></div>
+    <button class="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>Grow your margins, minus the busywork</h1>
+  <p>One flat-rate subscription covering conversion optimization, design, and development — built to help your store grow faster and smarter.</p>
+  <div class="hero-btns">
+    <a class="btn btn-primary" href="#plans">View plans <svg viewBox="0 0 9 8" fill="none"><path d="M1 4h7M5 1l3 3-3 3" stroke="#fff" stroke-width="1.2"/></svg></a>
+    <a class="btn btn-ghost" href="#faq">Schedule a call</a>
+  </div>
+  <div class="trust">Backed by 50+ Shopify Plus merchants</div>
+</header>
+
+<section class="intro">
+  <div class="eyebrow">Made for Fearless Growth</div>
+  <h2>Growth that compounds</h2>
+</section>
+
+<section class="section" id="services">
+  <div class="cards-1">
+    <div class="card card-row">
+      <div class="feat-top">
+        <img class="feat-icon" src="img/icon-1.webp" alt="">
+        <div class="feat-text">
+          <h3>Quicker Wins, Bigger Payoffs</h3>
+          <p>Every decision is backed by data and design craft, so conversions climb and your return on investment gets stronger store-wide.</p>
+        </div>
+      </div>
+      <div class="card-img"><img src="img/feature-1.webp" alt=""></div>
+    </div>
+    <div class="card-row split">
+      <div class="card">
+        <div class="feat-top">
+          <img class="feat-icon" src="img/icon-2.webp" alt="">
+          <div class="feat-text">
+            <h3>Consistent Outcomes, Every Cycle</h3>
+            <p>One seamless subscription gives you steady access to CRO, design, and development — all shaped around growing your Shopify store efficiently, no guesswork required.</p>
+          </div>
+        </div>
+        <div class="card-img"><img src="img/feature-2.webp" alt=""></div>
+      </div>
+      <div class="card">
+        <div class="feat-top">
+          <img class="feat-icon" src="img/icon-3.webp" alt="">
+          <div class="feat-text">
+            <h3>From Concept to Live in Two Days</h3>
+            <p>Rapid turnarounds mean meaningful A/B tests, polished designs, and fresh updates land within 48 hours.</p>
+          </div>
+        </div>
+        <div class="card-img"><img src="img/feature-3.webp" alt=""></div>
+      </div>
+    </div>
+    <div style="text-align:center"><a class="btn btn-primary" href="#plans">View plans</a></div>
+  </div>
+</section>
+
+<section class="section tint">
+  <div class="intro" style="padding-top:0">
+    <div class="eyebrow">What You Get</div>
+    <h2>Everything included</h2>
+  </div>
+  <div class="grid-3">
+    <div class="benefit">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+      <h3>Lift Conversions</h3>
+      <p>Every design tweak, test, and optimization is aimed at lifting conversions and growing revenue.</p>
+    </div>
+    <div class="benefit">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 001 1h2l10 5V4L6 9H4a1 1 0 00-1 1z"/><path d="M16 9a3 3 0 010 6"/></svg>
+      <h3>High-Performing Ad Creative</h3>
+      <p>Bespoke ad creative built to stop the scroll and turn clicks into customers, wherever you advertise.</p>
+    </div>
+    <div class="benefit">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+      <h3>Emails That Convert</h3>
+      <p>From automated flows to one-off campaigns, our email designs are built to perform, not just look good.</p>
+    </div>
+    <div class="benefit">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <h3>Insight-Led Growth</h3>
+      <p>We dig into your store's performance data and put proven CRO tactics and A/B tests to work.</p>
+    </div>
+    <div class="benefit">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6z"/></svg>
+      <h3>Total Independence</h3>
+      <p>A CRO team on tap, with none of the micromanaging or endless back-and-forth — just outcomes.</p>
+    </div>
+    <div class="benefit">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+      <h3>One Team, Every Need</h3>
+      <p>Landing pages, product imagery, whatever comes up — one team handles the whole request list.</p>
+    </div>
+  </div>
+  <div class="center-btn"><a class="btn btn-primary" href="#plans">View plans</a></div>
+</section>
+
+<section class="section" id="process">
+  <div class="intro" style="padding-top:0">
+    <div class="eyebrow">How It Works</div>
+    <h2>Simple to start</h2>
+  </div>
+  <div class="process">
+    <div class="step"><h3>✍️ Share your goals</h3><p>A short onboarding form captures your store's challenges and targets, so we know exactly where to focus for maximum growth.</p></div>
+    <div class="step"><h3>🛠️ We build your roadmap</h3><p>We audit your Shopify store, align with your brand's vision, and map out a plan built to lift profit per visitor.</p></div>
+    <div class="step"><h3>🚀 Send requests right away</h3><p>Queue up A/B tests, design tweaks, or custom builds whenever you need them — we prioritize and ship fast, so growth never stalls.</p></div>
+    <div class="step"><h3>📈 Watch the numbers move</h3><p>Conversions climb, profit per visitor improves, operations get simpler — all from one predictable subscription that grows alongside you.</p></div>
+  </div>
+  <div class="center-btn"><a class="btn btn-primary" href="#plans">View plans</a></div>
+</section>
+
+<section class="section tint">
+  <div class="quote-card">
+    <q>The whole process, start to finish, was smooth and well communicated. We set out to improve our conversion rate, and that's exactly what happened — money well spent.</q>
+    <cite>Owen Faulkner</cite>
+  </div>
+  <div class="collab">
+    <div><div class="num">01</div><h3>Work Your Way</h3><p>Async-only, or a few check-ins along the way — you decide the rhythm. We trust you know your business best.</p></div>
+    <div><div class="num">02</div><h3>Tracked in ClickUp</h3><p>Every request lives in ClickUp, so you can see what's active, queued, or wrapped up at a glance.</p></div>
+    <div><div class="num">03</div><h3>Bring Your Team In</h3><p>Add teammates whenever you like — they can file requests, follow progress, and stay on the same page as you.</p></div>
+  </div>
+</section>
+
+<section class="section" id="plans">
+  <div class="intro" style="padding-top:0">
+    <h2>Design, development, CRO &mdash; under one roof</h2>
+  </div>
+  <div class="chips">
+    <span class="chip">Banners</span><span class="chip">Product imagery</span><span class="chip">Store changes</span>
+    <span class="chip">Landing pages</span><span class="chip">Ad creative</span><span class="chip">Email design</span>
+    <span class="chip">Listicles</span><span class="chip">Packaging design</span><span class="chip">A/B testing</span>
+    <span class="chip">Branding</span><span class="chip">Social posts</span><span class="chip more">+ more</span>
+  </div>
+
+  <div class="cta-banner">
+    <h2>Join Verdant</h2>
+    <div class="cta-inner">
+      <div><h3>Book a quick intro call</h3><p>See how Verdant works and whether it's the right fit for your store.</p></div>
+      <svg width="9" height="9" viewBox="0 0 9 8" fill="none"><path d="M1 4h7M5 1l3 3-3 3" stroke="#fff" stroke-width="1.2"/></svg>
+    </div>
+  </div>
+
+  <div class="pricing">
+    <div class="plan standard">
+      <h2>Standard</h2>
+      <p class="price">$3,995/month</p>
+      <p class="desc">One request at a time. Pause or cancel anytime.</p>
+      <div><h4>What you get:</h4>
+        <ul>
+          <li>One request at a time</li><li>Average 72 hour delivery</li><li>Unlimited brands</li>
+          <li>Shopify development</li><li>Unlimited users</li><li>Pause or cancel anytime</li>
+          <li>Full autonomy</li><li>Supports ads &amp; emails</li>
+        </ul>
+      </div>
+      <a class="btn btn-light" style="align-self:flex-start" href="#">Get started</a>
+      <p class="foot">or schedule a call</p>
+    </div>
+    <div class="plan premium">
+      <h2>Premium</h2>
+      <p class="price">$6,995/month</p>
+      <p class="desc">Two requests in parallel. Pause or cancel anytime.</p>
+      <div><h4>Also covers:</h4>
+        <ul>
+          <li>Campaign banners</li><li>PDP updates</li><li>Store tweaks</li>
+          <li>Landing pages</li><li>Product imagery</li><li>Two requests at once</li>
+          <li>A/B testing</li><li>Ad creative</li><li>Email campaigns</li>
+          <li>Full branding packages</li><li>Packaging design</li><li>Social media visuals</li>
+        </ul>
+      </div>
+      <a class="btn btn-light" style="align-self:flex-start" href="#">Get started</a>
+      <p class="foot">or schedule a call</p>
+    </div>
+  </div>
+</section>
+
+<section class="section tint" id="faq">
+  <div class="intro" style="padding-top:0">
+    <div class="eyebrow">FAQ</div>
+    <h2>Got questions?</h2>
+  </div>
+  <div class="faq-list" id="faqList">
+    <div class="faq-item"><button class="faq-q">Why does CRO matter?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>Conversion rate optimization turns the traffic you're already getting into more revenue, with no extra ad spend.</p></div></div>
+    <div class="faq-item"><button class="faq-q">What makes Verdant different?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>A single flat-rate subscription replaces the usual scramble of freelancers and agencies for design, dev, and strategy.</p></div></div>
+    <div class="faq-item"><button class="faq-q">What can I expect in a typical month?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>Several rounds of design and development work, delivered on a rolling basis, averaging about 72 hours per request.</p></div></div>
+    <div class="faq-item open"><button class="faq-q">How does Verdant decide what to work on?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>You call the shots — submit whatever design, development, or optimization task you need. We also keep an eye on your store and proactively suggest changes likely to move the needle on conversions.</p></div></div>
+    <div class="faq-item"><button class="faq-q">What if I'm not sure what I need?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>No problem — our audit reviews your store and points you toward where to begin.</p></div></div>
+    <div class="faq-item"><button class="faq-q">Can Verdant run things autonomously?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>Absolutely — if you'd rather stay hands-off, we'll propose and ship improvements on our own.</p></div></div>
+    <div class="faq-item"><button class="faq-q">How fast do requests turn around?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>Most requests turn around in about 72 hours.</p></div></div>
+    <div class="faq-item"><button class="faq-q">How flexible is the subscription?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>No lock-in contracts — pause or cancel whenever you need to.</p></div></div>
+    <div class="faq-item"><button class="faq-q">Can I mix design and development requests?<svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg></button><div class="faq-a"><p>Yes — one task at a time, and it can be any mix of design, development, or CRO.</p></div></div>
+  </div>
+  <p class="faq-foot">Still have questions? <a href="#">Book a call</a></p>
+</section>
+
+<footer>
+  <span class="logo">Verdant</span>
+  <a href="#">hello@verdant.co</a>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>
