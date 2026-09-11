@@ -115,6 +115,26 @@ body.custom-background { background-color: #141414; }
 }
 </style>
 <link rel="stylesheet" href="/assets/preloader/preloader.css">
+<style>
+/* lower the theme's navbar-expand-md breakpoint (768px, compiled into
+   style.css) down to 680px, so the desktop nav stays visible at
+   narrower widths instead of collapsing to the mobile toggler — this
+   theme's Bootstrap build only ever kept the -md variant's rules (it's
+   the only one the markup used), so switching the navbar-expand-* class
+   itself to -sm would leave nothing to style it with. This instead
+   reuses the real -md rules verbatim at a second, lower, non-overlapping
+   @media range (680-767.98px) that fills the gap below the original
+   768px trigger — no specificity fight with style.css, since the two
+   ranges never overlap. */
+@media (min-width:680px) and (max-width:767.98px){
+  .navbar-expand-md{flex-flow:row nowrap;justify-content:flex-start}
+  .navbar-expand-md .navbar-nav{flex-direction:row}
+  .navbar-expand-md .navbar-nav .nav-link{padding-right:.5rem;padding-left:.5rem}
+  .navbar-expand-md>.container,.navbar-expand-md>.container-fluid{flex-wrap:nowrap}
+  .navbar-expand-md .navbar-collapse{display:flex!important;flex-basis:auto}
+  .navbar-expand-md .navbar-toggler{display:none}
+}
+</style>
 </head>
 <body class="home wp-singular page-template page-template-page-templates page-template-fullwidthpage_home page-template-page-templatesfullwidthpage_home-php page page-id-2129 custom-background wp-custom-logo wp-embed-responsive wp-theme-understrap wp-child-theme-mikhail-mehra-v2 understrap-no-sidebar">
 

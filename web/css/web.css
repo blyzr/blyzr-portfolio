@@ -95,16 +95,22 @@
 .expand-close:hover{background:rgba(15,15,15,.85)}
 
 .expand-frame-col{position:relative;flex:1;min-width:0;height:100%;background:#0a0a0a}
+
+/* lives in the details sidebar now (below the tech tags), not floating
+   over the frame — accent matches the site's own ink (--pa, set on
+   .expand-panel in openSite()) rather than the portfolio's generic
+   --accent, same as the tags/kicker beside it */
 .viewport-toggle{
-  position:absolute;top:var(--s4);left:var(--s4);z-index:5;display:flex;gap:2px;
-  background:rgba(15,15,15,.6);border:1px solid rgba(232,230,225,.18);border-radius:100px;padding:3px;
+  display:flex;gap:2px;margin-bottom:var(--s4);
+  background:var(--base);border:1px solid var(--edge);border-radius:100px;padding:3px;
 }
 .viewport-toggle button{
-  width:32px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:100px;
-  color:rgba(232,230,225,.55);transition:background .2s,color .2s;
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 0;border-radius:100px;
+  font-variation-settings:"MONO" 1;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);transition:background .2s,color .2s;
 }
-.viewport-toggle button svg{width:16px;height:16px}
-.viewport-toggle button.on{background:var(--accent);color:#fff}
+.viewport-toggle button svg{width:14px;height:14px;flex:none}
+.viewport-toggle button.on{background:var(--pa,var(--accent));color:#fff}
 .viewport-toggle button:hover:not(.on){color:var(--text)}
 
 /* container-type:size (not inline-size) gives both cqw and cqh, so the

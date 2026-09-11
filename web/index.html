@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Recursive:CASL,CRSV,MONO,slnt,wght@0..1,0..1,0..1,-15..0,300..1000&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/main.css">
-<link rel="stylesheet" href="/web/css/web.css?v=5">
+<link rel="stylesheet" href="/web/css/web.css?v=6">
 </head>
 <body>
 
@@ -48,17 +48,19 @@
       <p class="ed-sub" id="edSub"></p>
       <p class="ed-blurb" id="edBlurb"></p>
       <span class="tools" id="edTags"></span>
-      <a class="row-link" id="edLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Open live site &#8599;</a>
-    </div>
-    <div class="expand-frame-col">
       <div class="viewport-toggle" id="viewportToggle">
         <button type="button" data-vp="desktop" class="on" aria-label="Desktop view">
           <svg viewBox="0 0 20 16" fill="none"><rect x="1" y="1" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 15h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span>Desktop</span>
         </button>
         <button type="button" data-vp="mobile" aria-label="Mobile view">
           <svg viewBox="0 0 12 20" fill="none"><rect x="1" y="1" width="10" height="18" rx="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 16.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span>Mobile</span>
         </button>
       </div>
+      <a class="row-link" id="edLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Open live site &#8599;</a>
+    </div>
+    <div class="expand-frame-col">
       <div class="expand-frame-wrap" id="expandFrameWrap">
         <div class="expand-scale" id="expandScale">
           <iframe id="expandFrame" title="Site preview"></iframe>
@@ -68,6 +70,6 @@
   </div>
 </div>
 
-<script src="/web/js/web.js?v=5"></script>
+<script src="/web/js/web.js?v=6"></script>
 </body>
 </html>
