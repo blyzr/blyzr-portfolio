@@ -94,8 +94,8 @@ a{color:inherit}
 .diagram-revenue,.diagram-flow{margin-top:6px}
 /* the revenue line draws itself in once its card scrolls into view — see
    .reveal.in below, which is what actually adds the trigger class */
-.graph-actual{stroke-dasharray:600;stroke-dashoffset:600;transition:stroke-dashoffset 1.6s cubic-bezier(.2,.85,.24,1) .1s}
-.graph-dot{opacity:0;transition:opacity .3s ease 1.5s}
+.graph-actual{stroke-dasharray:600;stroke-dashoffset:600;transition:stroke-dashoffset 2.8s cubic-bezier(.2,.85,.24,1) .2s}
+.graph-dot{opacity:0;transition:opacity .4s ease 2.7s}
 .reveal.in .graph-actual{stroke-dashoffset:0}
 .reveal.in .graph-dot{opacity:1}
 
@@ -450,14 +450,24 @@ document.querySelectorAll('.faq-q').forEach(btn=>{
   });
 });
 
-const revealIO = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(!e.isIntersecting) return;
-    e.target.classList.add('in');
-    revealIO.unobserve(e.target);
-  });
-},{threshold:.15,rootMargin:'0px 0px -8% 0px'});
-document.querySelectorAll('.reveal').forEach(el=>revealIO.observe(el));
+// delayed until just after the preloader clears (it hides on window 'load',
+// then takes ~1s for its own min-display + fade) — starting the observer
+// immediately at parse time would fire .in on anything already in the
+// viewport (including this graph) while it's still hidden behind the
+// preloader, so by the time the page is actually visible the "reveal"
+// would already be finished and look like it never animated at all
+function initReveal(){
+  const revealIO = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      revealIO.unobserve(e.target);
+    });
+  },{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>revealIO.observe(el));
+}
+if (document.readyState === 'complete') setTimeout(initReveal, 700);
+else addEventListener('load', () => setTimeout(initReveal, 700), { once:true });
 </script>
 <script src="/assets/preloader/preloader.js"></script>
 </body>
