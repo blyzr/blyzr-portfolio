@@ -105,7 +105,11 @@ function fitScale(vp, animate) {
   const y = Math.max(0, (rect.height - vh    * scale) / 2);
 
   if (!animate) scaleEl.style.transition = 'none';
-  scaleEl.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
+  // translate3d, not translate: a 2D transform doesn't promote this to its
+  // own compositor layer, so the browser re-rasterised the whole scaled
+  // surface on the main thread while the embedded site scrolled and flashed
+  // un-painted (white) tiles. The 3D form keeps it on the GPU.
+  scaleEl.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale})`;
   if (!animate) { void scaleEl.offsetWidth; scaleEl.style.transition = ''; }
 }
 function applyViewport(vp, animate) {

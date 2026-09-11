@@ -137,6 +137,10 @@
   width:var(--vw);height:var(--vh);transform-origin:top left;
   transition:transform .4s cubic-bezier(.2,.85,.24,1);
   box-shadow:0 0 0 1px rgba(232,230,225,.08);
+  /* keeps the scaled surface on its own compositor layer between transforms
+     too, not just while one is animating — without it the embedded site
+     flashed un-painted white tiles as it scrolled */
+  will-change:transform;backface-visibility:hidden;
 }
 .expand-scale iframe{display:block;width:100%;height:100%;border:0;background:#fff}
 
