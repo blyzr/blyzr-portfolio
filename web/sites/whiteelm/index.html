@@ -33,53 +33,109 @@ a{color:inherit;text-decoration:none}
 .btn-outline-light:hover{background:#fff;color:var(--brown)}
 
 /* nav */
-.nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink)}
+.nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink);transition:box-shadow .3s ease}
+.nav.scrolled{box-shadow:0 4px 24px rgba(19,19,19,.1)}
 .nav-in{display:flex;align-items:center;justify-content:space-between;padding:20px 28px}
 .logo{font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:20px;letter-spacing:.02em}
 .nav-links{display:flex;gap:30px;list-style:none;margin:0;padding:0;font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
-.nav-links a:hover{color:var(--brown);text-decoration:underline}
+.nav-links a{position:relative;display:inline-block;padding-bottom:3px}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--brown);transition:width .25s ease}
+.nav-links a:hover{color:var(--brown)}
+.nav-links a:hover::after{width:100%}
 .nav-cta{display:flex;align-items:center;gap:20px;font-family:'Inter',sans-serif;font-size:13px;text-transform:uppercase;font-weight:500}
 .burger{display:none;background:none;border:0;cursor:pointer}
 .burger span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0}
 
-/* hero */
+/* hero — copy fades/lifts in on load, staggered; the bag has a soft hover
+   lift and a floating rating badge for an immediate trust signal (5.0
+   is defensible: every review actually shown below is a genuine 5-star) */
 .hero{position:relative;min-height:88vh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;overflow:hidden;background:var(--cream)}
 .hero-copy{position:relative;z-index:2;padding:0 6% 0 8%}
 .hero-copy .kicker{font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--brown);margin-bottom:18px;display:block}
-.hero-copy h1{font-size:clamp(34px,4.6vw,58px);line-height:1.05;color:var(--brown);margin-bottom:16px}
+.hero-copy h1{font-size:clamp(36px,5vw,64px);line-height:1.02;color:var(--brown);margin-bottom:16px}
 .hero-copy .sub{font-size:22px;color:var(--ink);max-width:20ch;margin-bottom:26px}
+.hero-copy>*{opacity:0;transform:translateY(18px);animation:heroIn .8s cubic-bezier(.2,.85,.24,1) forwards}
+.hero-copy .kicker{animation-delay:.1s}
+.hero-copy h1{animation-delay:.22s}
+.hero-copy .sub{animation-delay:.36s}
+.hero-copy .btn{animation-delay:.48s}
+@keyframes heroIn{to{opacity:1;transform:translateY(0)}}
 .hero-figure{position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center}
 .hero-figure img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
-.hero-figure img.bag{position:relative;z-index:1;max-height:78vh;width:auto;margin:0 auto;border-radius:10px;box-shadow:0 30px 70px rgba(19,19,19,.25)}
+.hero-figure img.bag{position:relative;z-index:1;max-height:78vh;width:auto;margin:0 auto;border-radius:10px;
+  box-shadow:0 30px 70px rgba(19,19,19,.25);transition:transform .5s cubic-bezier(.2,.85,.24,1)}
+.hero-figure:hover img.bag{transform:translateY(-6px) scale(1.015)}
+.hero-badge{
+  position:absolute;z-index:2;bottom:9%;left:4%;background:#fff;border-radius:100px;
+  padding:10px 18px 10px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 14px 34px rgba(19,19,19,.2);
+  font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--brown);
+  opacity:0;transform:translateY(14px) scale(.92);animation:heroIn .7s cubic-bezier(.2,.85,.24,1) .62s forwards;
+}
+.hero-badge .stars{font-size:13px;text-shadow:none}
+
+/* --- scroll reveal ---------------------------------------------------------
+   fade + lift once ~15% into the viewport — see the IntersectionObserver
+   at the bottom of the page, delayed until just after the preloader
+   clears so it doesn't finish playing while still hidden behind it */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.85,.24,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+@media (prefers-reduced-motion:reduce){
+  .reveal,.hero-copy>*,.hero-badge{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+}
+
+.rule{width:56px;height:3px;background:var(--gold);border-radius:3px;margin:0 0 18px}
+.rule.center{margin:0 auto 18px}
 
 /* intro */
 .intro{padding:90px 28px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto}
 .intro img{border-radius:60px}
 .intro h2{font-size:clamp(30px,3.6vw,44px);color:var(--brown);margin-bottom:18px}
 .intro p{color:#3a332c;font-size:19px;max-width:40ch}
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.stat-pill{
+  display:flex;align-items:center;gap:8px;border:1px solid var(--gold);border-radius:100px;
+  padding:9px 18px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--brown);
+}
+.stat-pill svg{width:15px;height:15px;color:var(--gold);flex:none}
 
 /* feature rows */
-.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;padding:70px 28px;max-width:1200px;margin:0 auto}
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;padding:70px 28px;max-width:1200px;margin:0 auto;overflow:hidden}
 .feature-row.rev{grid-template-columns:1fr 1fr}
 .feature-row.rev .ftext{order:2}
-.feature-row img{border-radius:50px;width:100%}
+.feature-row .shot{border-radius:50px;overflow:hidden}
+.feature-row img{width:100%;display:block;transition:transform .6s cubic-bezier(.2,.85,.24,1)}
+.feature-row:hover img{transform:scale(1.04)}
+.ftext .fnum{
+  font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:14px;color:var(--gold);
+  letter-spacing:.14em;margin-bottom:12px;display:block;
+}
 .ftext h2{font-size:clamp(28px,3.4vw,40px);color:var(--brown);margin-bottom:16px}
 .ftext p{color:#3a332c;font-size:19px;max-width:42ch}
 .tint{background:var(--cream)}
 
-/* cta band */
-.band{background:var(--brown);color:var(--cream);text-align:center;padding:70px 24px}
-.band h2{font-size:clamp(26px,3.6vw,42px);max-width:20ch;margin:0 auto}
+/* cta band — a huge, near-invisible watermark monogram behind the text
+   gives it some texture instead of a flat colour field */
+.band{position:relative;background:var(--brown);color:var(--cream);text-align:center;padding:70px 24px;overflow:hidden}
+.band::before{
+  content:"WE";position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);
+  font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:min(42vw,360px);
+  color:rgba(241,239,232,.06);pointer-events:none;line-height:1;letter-spacing:-.05em;white-space:nowrap;
+}
+.band .rule{background:var(--gold)}
+.band h2{position:relative;z-index:1;font-size:clamp(26px,3.6vw,42px);max-width:20ch;margin:0 auto}
 
 /* testimonials */
 .testi-head{text-align:center;padding:80px 28px 10px;max-width:600px;margin:0 auto}
 .testi-head h2{font-size:clamp(28px,3.6vw,42px);color:var(--brown)}
 .testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1200px;margin:40px auto 90px;padding:0 28px}
-.testi{display:flex;flex-direction:column;gap:14px}
+.testi{display:flex;flex-direction:column;gap:10px;transition:transform .35s cubic-bezier(.2,.85,.24,1)}
+.testi:hover{transform:translateY(-6px)}
 .testi .shot{border-radius:40px;overflow:hidden;aspect-ratio:3/4}
-.testi .shot img{width:100%;height:100%;object-fit:cover}
+.testi .shot img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.testi:hover .shot img{transform:scale(1.04)}
+.testi .quote-mark{font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:56px;color:var(--gold);opacity:.4;line-height:1;margin:6px 0 -10px}
 .testi h3{font-family:'Encode Sans Expanded',sans-serif;font-weight:900;font-size:20px;color:var(--brown)}
-.stars{color:var(--gold);font-size:16px;letter-spacing:2px}
+.stars{color:var(--gold);font-size:16px;letter-spacing:2px;text-shadow:0 0 14px rgba(211,178,105,.45)}
 .testi p{color:#3a332c;font-size:16px}
 
 /* final cta */
@@ -87,6 +143,7 @@ a{color:inherit;text-decoration:none}
 .final img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .final::after{content:"";position:absolute;inset:0;background:rgba(19,19,19,.55);z-index:0}
 .final-copy{position:relative;z-index:1;color:#fff;padding:0 24px}
+.final-copy .rule{background:var(--gold);margin:0 auto 20px}
 .final-copy h2{font-size:clamp(30px,4.4vw,52px);color:#fff;margin-bottom:24px;max-width:16ch}
 
 footer{background:var(--ink);color:var(--cream);padding:56px 28px 28px}
@@ -109,6 +166,11 @@ footer{background:var(--ink);color:var(--cream);padding:56px 28px 28px}
   .feature-row.rev .ftext{order:0}
   .testimonials{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr}
+  /* left/right+margin auto, not transform:translateX(-50%) — the entrance
+     keyframe's own 'to' state fully overwrites transform, which would
+     silently drop a translateX centering hack the moment it finishes */
+  .hero-badge{left:0;right:0;width:max-content;margin:0 auto;bottom:4%}
+  .stat-row{justify-content:center}
 }
 @media (max-width:520px){
   .intro,.feature-row{padding:50px 18px}
@@ -147,70 +209,85 @@ footer{background:var(--ink);color:var(--cream);padding:56px 28px 28px}
   <div class="hero-figure">
     <img class="bg" src="img/hero-bg.webp" alt="">
     <img class="bag" src="img/hero-bag.webp" alt="Gemini Convertible Backpack">
+    <div class="hero-badge"><span class="stars">★★★★★</span> Rated 5.0 by our customers</div>
   </div>
 </header>
 
-<section class="intro" id="story">
+<section class="intro reveal" id="story">
   <img src="img/lifestyle-1.webp" alt="">
   <div>
+    <div class="rule"></div>
     <h2>Designed For Women By Women</h2>
     <p>Dedicated to empowering modern-day women with multifunctional and versatile bags that seamlessly blend organization and style.</p>
+    <div class="stat-row">
+      <span class="stat-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0-3-2.2-5.1-5-5.1-1.9 0-3.4 1-4.3 2.5-.9-1.5-2.4-2.5-4.3-2.5-2.8 0-5 2.1-5 5.1 0 5.4 9.3 10.4 9.3 10.4s9.3-5 9.3-10.4z"/></svg>Designed By Women</span>
+      <span class="stat-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>Convertible Design</span>
+      <span class="stat-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 6.6L21 9.3l-5 4.6 1.3 6.9L12 17.3l-5.3 3.5L8 13.9 3 9.3l6.4-.7z"/></svg>5.0★ Rated</span>
+    </div>
   </div>
 </section>
 
-<div class="band"><h2>Why White Elm Will Be Your New Everyday Companion</h2></div>
+<div class="band reveal"><div class="rule center"></div><h2>Why White Elm Will Be Your New Everyday Companion</h2></div>
 
-<div class="feature-row" id="shop">
-  <img src="img/lifestyle-2.webp" alt="">
+<div class="feature-row reveal" id="shop">
+  <div class="shot"><img src="img/lifestyle-2.webp" alt=""></div>
   <div class="ftext">
+    <span class="fnum">01</span>
     <h2>Pack Like A Pro</h2>
     <p>Designed with versatile storage to keep you organized, no matter your lifestyle.</p>
   </div>
 </div>
 
-<div class="feature-row rev tint">
-  <img src="img/lifestyle-3.webp" alt="">
+<div class="feature-row rev tint reveal">
+  <div class="shot"><img src="img/lifestyle-3.webp" alt=""></div>
   <div class="ftext">
+    <span class="fnum">02</span>
     <h2>Travel In Style</h2>
     <p>Designed with a pocket that converts into a travel sleeve, with just one zip. White Elm will be your new favourite companion, no matter where you are in the world.</p>
   </div>
 </div>
 
-<div class="feature-row">
-  <img src="img/lifestyle-4.webp" alt="">
+<div class="feature-row reveal">
+  <div class="shot"><img src="img/lifestyle-4.webp" alt=""></div>
   <div class="ftext">
+    <span class="fnum">03</span>
     <h2>Ultimate Versatility</h2>
     <p>Designed to effortlessly adapt to your lifestyle needs. With a multitude of wearing styles, it can go from work to play in seconds.</p>
   </div>
 </div>
 
-<div class="testi-head" id="reviews">
+<div class="testi-head reveal" id="reviews">
+  <div class="rule center"></div>
   <h2>Loved By Thousands Of Happy Women</h2>
 </div>
 <div class="testimonials">
-  <div class="testi">
+  <div class="testi reveal">
     <div class="shot"><img src="img/testimonial-1.webp" alt=""></div>
+    <span class="quote-mark">"</span>
     <h3>Lauren B.</h3>
     <span class="stars">★★★★★</span>
     <p>"I bought the Gemini bag, and it's a perfect fit for my laptop, planner, keys, wallet, binder and lunch. It carries it all and is absolutely beautiful with any outfit!"</p>
   </div>
-  <div class="testi">
+  <div class="testi reveal">
     <div class="shot"><img src="img/testimonial-2.webp" alt=""></div>
+    <span class="quote-mark">"</span>
     <h3>Kayla</h3>
     <span class="stars">★★★★★</span>
     <p>"I just adore this bag! I received it today (very fast with shipping) and I cannot wait to use it! I am absolutely in love. It's even more gorgeous in person!"</p>
   </div>
-  <div class="testi">
+  <div class="testi reveal">
     <div class="shot"><img src="img/testimonial-3.webp" alt=""></div>
+    <span class="quote-mark">"</span>
     <h3>Jocelyn I.</h3>
     <span class="stars">★★★★★</span>
     <p>"All of my folders, manuals and 2 big Yeti cups, plus much more fits in this bag. It's the perfect professional looking bag. I LOVE it!"</p>
   </div>
 </div>
 
-<div class="final">
+<div class="final reveal">
   <img src="img/cta-bg.webp" alt="">
   <div class="final-copy">
+    <div class="rule center"></div>
     <h2>The Only Bag You'll Ever Need</h2>
     <a class="btn btn-outline-light" href="#shop">Shop Now</a>
   </div>
@@ -234,6 +311,28 @@ footer{background:var(--ink);color:var(--cream);padding:56px 28px 28px}
   <p class="foot-bottom">© White Elm. All rights reserved.</p>
 </footer>
 
+<script>
+addEventListener('scroll', () => {
+  document.querySelector('.nav').classList.toggle('scrolled', scrollY > 4);
+}, { passive:true });
+
+// delayed until just after the preloader clears (it hides on window
+// 'load', then takes ~1s for its own min-display + fade) — starting the
+// observer immediately would fire .in on anything already in the
+// viewport while still hidden behind the preloader
+function initReveal(){
+  const revealIO = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      revealIO.unobserve(e.target);
+    });
+  },{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>revealIO.observe(el));
+}
+if (document.readyState === 'complete') setTimeout(initReveal, 1000);
+else addEventListener('load', () => setTimeout(initReveal, 1000), { once:true });
+</script>
 <script src="/assets/preloader/preloader.js"></script>
 </body>
 </html>

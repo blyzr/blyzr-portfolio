@@ -118,7 +118,7 @@
    the page's vertical middle. */
 .expand-frame-wrap{
   position:absolute;inset:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
-  container-type:size;--vw:1080px;--vh:815px;
+  container-type:size;--vw:1200px;--vh:905px;
 }
 .expand-scale{
   width:var(--vw);height:var(--vh);transform-origin:top left;
