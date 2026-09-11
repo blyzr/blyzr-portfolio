@@ -1,0 +1,59 @@
+/* ============================= bpjr PRELOADER =============================
+   Shared across the main portfolio and every /web/sites/* page. Each page
+   sets three custom properties inline on #bpjr-preloader to match its own
+   theme (--pl-bg/--pl-ink/--pl-accent) — everything else is identical. */
+#bpjr-preloader{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--pl-bg,#0f0f0f);
+  transition:opacity .5s ease;
+}
+#bpjr-preloader.pl-done{opacity:0;pointer-events:none}
+
+.pl-word{
+  display:inline-flex;
+  font-family:'Recursive',system-ui,sans-serif;
+  font-variation-settings:"MONO" 0,"CASL" .15,"slnt" 0,"wght" 650;
+  font-size:clamp(32px,7vw,72px);letter-spacing:-.02em;line-height:1;
+}
+
+/* each letter fades/lifts into place (the "reveal"), while its own
+   ::before duplicate (content:attr(data-l), gradient-clipped) sweeps a
+   flash of the page's accent colour across it at the same time (the
+   "flow of colours") — two independent animations layered on one glyph */
+.pl-l{
+  position:relative;display:inline-block;color:var(--pl-ink,#e8e6e1);
+  opacity:0;transform:translateY(8px);
+  animation:pl-reveal .7s cubic-bezier(.2,.85,.24,1) forwards;
+}
+.pl-l::before{
+  content:attr(data-l);position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 30%,var(--pl-accent,#d4472f) 50%,transparent 70%);
+  background-size:260% 100%;background-position:150% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:pl-sweep .7s cubic-bezier(.2,.85,.24,1) forwards;
+}
+.pl-l:nth-child(1),.pl-l:nth-child(1)::before{animation-delay:.05s}
+.pl-l:nth-child(2),.pl-l:nth-child(2)::before{animation-delay:.18s}
+.pl-l:nth-child(3),.pl-l:nth-child(3)::before{animation-delay:.31s}
+.pl-l:nth-child(4),.pl-l:nth-child(4)::before{animation-delay:.44s}
+.pl-dot,.pl-dot::before{animation-delay:.57s !important;font-style:normal}
+
+@keyframes pl-reveal{to{opacity:1;transform:translateY(0)}}
+@keyframes pl-sweep{to{background-position:-40% 0}}
+
+/* only kicks in if the page is still loading once preloader.js's stall
+   timer fires — a quiet "still working" tell for a slow load rather than
+   a frozen-looking finished word */
+#bpjr-preloader.pl-stall .pl-dot{
+  animation:pl-reveal .7s cubic-bezier(.2,.85,.24,1) forwards, pl-spin 1s linear infinite .9s;
+  transform-origin:50% 55%;
+}
+
+@keyframes pl-spin{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .pl-l,.pl-l::before{animation:none;opacity:1;transform:none;background-position:-40% 0}
+  #bpjr-preloader.pl-stall .pl-dot{animation:none}
+  #bpjr-preloader{transition:opacity .2s ease}
+}
