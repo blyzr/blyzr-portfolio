@@ -13,7 +13,7 @@ const sites = [
     tags:['HTML','CSS','JS'], ink:'#c79a3d', link:'/web/sites/blossom/index.html' },
   { slug:'whiteelm', name:'White Elm', kicker:'04 · Storefront homepage', sub:'Convertible bag brand, women-led and versatile.',
     blurb:'A product-led homepage for a convertible bag brand, built around lifestyle photography and customer testimonials.',
-    tags:['HTML','CSS','JS'], ink:'#5b371d', link:'/web/sites/whiteelm/index.html' },
+    tags:['HTML','CSS','JS'], ink:'#d9c2a0', link:'/web/sites/whiteelm/index.html' },
 ];
 
 const $ = sel => document.querySelector(sel);
@@ -100,7 +100,13 @@ function openSite(card) {
 
   overlay.hidden = false;
   iframe.src = `/web/sites/${slug}/index.html`;
-  applyViewport(DESKTOP, false);
+  // a real phone visitor's own frame area is only ~390px wide (the panel
+  // goes fullscreen under 860px — see .expand-overlay in web.css); always
+  // defaulting to the 1080px desktop simulation there reproduces the exact
+  // "tiny" scale-down the grid thumbnails had, just relocated to the
+  // expand panel — default to the MOBILE simulation instead when the
+  // visitor's own viewport is this narrow, matching that breakpoint
+  applyViewport(matchMedia('(max-width:860px)').matches ? MOBILE : DESKTOP, false);
 
   const startRect = card.getBoundingClientRect();
   panel.classList.remove('animating');
