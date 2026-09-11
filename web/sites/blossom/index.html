@@ -18,10 +18,14 @@ p{margin:0}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
-.eyebrow{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.eyebrow{
+  display:inline-flex;align-items:center;
+  font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+  background:#3a332f;padding:6px 16px;border-radius:100px;
+}
 
 .btn{
-  display:inline-flex;align-items:center;gap:8px;padding:14px 30px;border-radius:2px;
+  display:inline-flex;align-items:center;gap:8px;padding:14px 30px;border-radius:3px;
   font-family:'Roboto Mono',monospace;font-weight:700;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
   border:1px solid var(--ink);cursor:pointer;transition:transform .15s ease,background .2s;
 }
@@ -47,7 +51,7 @@ a{color:inherit;text-decoration:none}
 .hero{position:relative;min-height:86vh;display:flex;align-items:center;overflow:hidden}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .hero-copy{position:relative;z-index:1;padding:0 8%;max-width:560px}
-.hero-copy .eyebrow{margin-bottom:16px;display:block}
+.hero-copy .eyebrow{margin-bottom:16px}
 .hero-copy h1{font-size:clamp(34px,5vw,58px);line-height:1.08;margin-bottom:18px}
 .hero-copy p{font-size:18px;max-width:36ch;margin-bottom:28px;color:#3a332f}
 .hero-btns{display:flex;gap:14px;flex-wrap:wrap}
@@ -63,7 +67,7 @@ a{color:inherit;text-decoration:none}
 .section-head p{margin-top:14px;color:#5c534c}
 
 /* product grid */
-.products{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;max-width:1180px;margin:0 auto}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;max-width:1180px;margin:0 auto}
 .product{display:flex;flex-direction:column;gap:12px}
 .product .shot{border-radius:4px;overflow:hidden;background:var(--lilac);aspect-ratio:3/4}
 .product .shot img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
@@ -75,16 +79,16 @@ a{color:inherit;text-decoration:none}
 /* story split */
 .story{display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:center;max-width:1180px;margin:0 auto}
 .story img{border-radius:4px}
-.story .eyebrow{margin-bottom:16px;display:block}
+.story .eyebrow{margin-bottom:16px}
 .story h2{font-size:clamp(26px,3.4vw,38px);margin-bottom:18px}
 .story p{color:#5c534c;margin-bottom:14px;max-width:44ch}
 
 /* banner */
 .banner{position:relative;min-height:52vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
 .banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.banner::after{content:"";position:absolute;inset:0;background:rgba(38,34,32,.42);z-index:0}
+.banner::after{content:"";position:absolute;inset:0;background:rgba(38,34,32,.62);z-index:0}
 .banner-copy{position:relative;z-index:1;color:#fff;max-width:520px;padding:0 24px}
-.banner-copy .eyebrow{color:var(--gold);margin-bottom:14px;display:block}
+.banner-copy .eyebrow{color:var(--gold);margin-bottom:14px}
 .banner-copy h2{color:#fff;font-size:clamp(28px,4vw,44px);margin-bottom:18px}
 
 /* newsletter */
@@ -186,12 +190,6 @@ footer{background:var(--ink);color:var(--cream);padding:56px 28px 30px}
     <div class="product">
       <div class="shot"><img src="img/bottle-chloe.webp" alt="Chloe (Inspired by)"></div>
       <h3>Chloe</h3>
-      <span class="price">£15.95</span>
-      <a class="btn btn-gold" href="#">Shop now</a>
-    </div>
-    <div class="product">
-      <div class="shot"><img src="img/bottle-alien.webp" alt="Alien (Inspired by)"></div>
-      <h3>Alien</h3>
       <span class="price">£15.95</span>
       <a class="btn btn-gold" href="#">Shop now</a>
     </div>
