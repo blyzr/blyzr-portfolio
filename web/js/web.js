@@ -3,17 +3,17 @@
 
 const sites = [
   { slug:'mikflix', name:'MikFlix', kicker:'01 · WordPress site', sub:'Director’s portfolio site.',
-    blurb:'Designed, then built. Live seven years. Homepage carousel and project thumbnails are the real, live interactions — this is the actual local site, not a recording of it.',
+    blurb:'Designed, then built. Live seven years. The homepage carousel and project thumbnails are the real, live interactions — this is the actual site, not a recording of it.',
     tags:['WordPress','PHP','MySQL','JS'], ink:'#c0392b', link:'https://mikhailmehra.com' },
-  { slug:'syntra', name:'Syntra', kicker:'02 · SaaS landing page', sub:'Shopify growth subscription, coded from a Figma design.',
-    blurb:'A pricing-led landing page for a Shopify CRO/design subscription — built faithfully from the source Figma file, real breakpoints included.',
-    tags:['HTML','CSS','JS'], ink:'#557143' },
-  { slug:'blossom', name:'Blossom Perfumery', kicker:'03 · Storefront homepage', sub:'Designer-inspired fragrance, elevated from an email template.',
-    blurb:'The source Figma file was a promo email, not a homepage — this is a full storefront built around its product photography and brand voice.',
-    tags:['HTML','CSS','JS'], ink:'#c79a3d' },
-  { slug:'whiteelm', name:'White Elm', kicker:'04 · Storefront homepage', sub:'Convertible bag brand, elevated from an email template.',
-    blurb:'Same story as Blossom — the Figma source was an email campaign, rebuilt here as a proper homepage around its own photography and copy.',
-    tags:['HTML','CSS','JS'], ink:'#5b371d' },
+  { slug:'syntra', name:'Syntra', kicker:'02 · SaaS landing page', sub:'Shopify growth subscription — pricing-led landing page.',
+    blurb:'A predictable-subscription pitch for a Shopify CRO and design agency, built around plans, process, and proof.',
+    tags:['HTML','CSS','JS'], ink:'#557143', link:'/web/sites/syntra/index.html' },
+  { slug:'blossom', name:'Blossom Perfumery', kicker:'03 · Storefront homepage', sub:'Designer-inspired fragrance, direct-to-consumer.',
+    blurb:'A boutique fragrance storefront built around real product photography, pricing, and a warm, editorial brand voice.',
+    tags:['HTML','CSS','JS'], ink:'#c79a3d', link:'/web/sites/blossom/index.html' },
+  { slug:'whiteelm', name:'White Elm', kicker:'04 · Storefront homepage', sub:'Convertible bag brand, women-led and versatile.',
+    blurb:'A product-led homepage for a convertible bag brand, built around lifestyle photography and customer testimonials.',
+    tags:['HTML','CSS','JS'], ink:'#5b371d', link:'/web/sites/whiteelm/index.html' },
 ];
 
 const $ = sel => document.querySelector(sel);

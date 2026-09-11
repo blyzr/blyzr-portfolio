@@ -22,7 +22,7 @@
 
 /* --- grid ----------------------------------------------------------------- */
 .web-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s6);
+  display:grid;grid-template-columns:1fr;gap:var(--s7);
   padding:0 var(--gut) var(--s9);
 }
 .site-card{
@@ -36,7 +36,7 @@
 .site-card.is-hidden{visibility:hidden}
 
 .thumb-wrap{
-  position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#0a0a0a;
+  position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#0a0a0a;
   border-bottom:1px solid var(--edge);
 }
 .thumb-scale{
@@ -52,9 +52,6 @@
 .card-tags{display:flex;flex-wrap:wrap;gap:var(--s2)}
 .card-tags .tool{font-size:9.5px}
 
-@media (max-width:900px){
-  .web-grid{grid-template-columns:1fr}
-}
 @media (max-width:520px){
   .web-hero{padding:var(--s7) var(--gut) var(--s5)}
   .web-hero h1{font-size:36px}
