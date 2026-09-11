@@ -71,21 +71,22 @@
 .expand-overlay.on{background:rgba(10,10,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .expand-overlay[hidden]{display:none}
 
-/* the panel no longer forces a fixed 16:9 shape — that was the actual
-   bug: hand-calibrating a "16:9 panel minus a 300px sidebar" shape to
-   match one specific DESKTOP aspect ratio only ever worked at exactly
-   the one panel width it was calibrated for, and left a large empty gap
-   (or would have overflowed) at every other width. Instead
-   .expand-frame-col's own aspect-ratio reads --vw/--vh directly (set on
-   this element by applyViewport() in web.js), so the frame's box shape
-   always matches whichever device is being simulated — the panel's
-   height is then just whatever that naturally works out to (details
-   column stretches to match via the default flex align-items:stretch),
-   capped by --panel-max-h so a very wide panel simulating a narrow
-   MOBILE viewport can't demand an absurdly tall box. */
+/* fixed, simple panel dimensions — no more deriving panel/frame shape
+   from the simulated device (aspect-ratio, container queries, all of
+   it): that approach broke three separate times (a fixed-16:9-panel
+   calibration that only matched one exact width; aspect-ratio fighting
+   flex-shrink and tearing the frame's real ratio away from what the
+   scale math assumed; cqw/cqh apparently not reflecting the frame's
+   actual rendered size once it was itself sized by flex-grow inside a
+   flex column). The frame column is now just an ordinary flex-fill
+   element with no intrinsic sizing logic of its own, in both the
+   desktop row layout and the mobile column one — see fitScale() in
+   web.js, which measures its real rendered box with
+   getBoundingClientRect() and sets the scale directly, sidestepping
+   all of the above. */
 .expand-panel{
-  --panel-max-h:90vh;--vw:1280px;--vh:800px;
-  position:relative;display:flex;flex-direction:row;width:min(1180px,100%);max-height:var(--panel-max-h);
+  --vw:1280px;--vh:800px;
+  position:relative;display:flex;flex-direction:row;width:min(1180px,100%);height:min(700px,86vh);
   background:var(--surface);border:1px solid var(--edge);border-radius:var(--r2);overflow:hidden;
   transform-origin:top left;will-change:transform;box-shadow:0 40px 100px rgba(0,0,0,.5);
 }
@@ -98,10 +99,7 @@
 }
 .expand-close:hover{background:rgba(15,15,15,.85)}
 
-.expand-frame-col{
-  position:relative;flex:1;min-width:0;min-height:120px;background:#0a0a0a;
-  aspect-ratio:var(--vw)/var(--vh);max-height:var(--panel-max-h);
-}
+.expand-frame-col{position:relative;flex:1;min-width:0;background:#0a0a0a}
 
 /* lives in the details sidebar now (below the tech tags), not floating
    over the frame — accent matches the site's own ink (--pa, set on
@@ -120,35 +118,24 @@
 .viewport-toggle button.on{background:var(--pa,var(--accent));color:#fff}
 .viewport-toggle button:hover:not(.on){color:var(--text)}
 
-/* container-type:size (not inline-size) gives both cqw and cqh, so the
-   min(...) below can do a real "fit contain" — the frame wrap's own size
-   comes from position:absolute;inset:0 filling .expand-frame-col's
-   aspect-ratio box, a definite extrinsic size, which is what
-   container-type:size requires. --vw/--vh (set on .expand-panel, an
-   ancestor of both this and .expand-frame-col — see applyViewport() in
-   web.js) inherit down to here too, so under normal circumstances this
-   scale resolves to 1 (the frame is already the right shape). It only
-   does real work as a safety net for when --panel-max-h clamps
-   .expand-frame-col's aspect-ratio box (an extreme case, e.g. MOBILE's
-   narrow ratio at a very wide panel) — CSS reduces the used height
-   there but doesn't shrink the width to compensate, so this still
-   catches that gap rather than reintroducing it. Top-aligned, not
-   centered: a real browser starts at the page's own top rather than
-   floating the viewport around the page's vertical middle. */
+/* the scale transform on .expand-scale is set directly by fitScale() in
+   web.js (getBoundingClientRect() on this wrap vs. the real device size
+   in --vw/--vh) rather than computed in CSS — see the comment on
+   .expand-panel for why. Top-aligned, not centered: a real browser
+   starts at the page's own top rather than floating the viewport around
+   the page's vertical middle. */
 .expand-frame-wrap{
   position:absolute;inset:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
-  container-type:size;
 }
 .expand-scale{
   width:var(--vw);height:var(--vh);transform-origin:top left;
-  transform:scale(min(calc(100cqw / var(--vw)), calc(100cqh / var(--vh))));
-  transition:transform .4s cubic-bezier(.2,.85,.24,1),width .4s cubic-bezier(.2,.85,.24,1);
+  transition:transform .4s cubic-bezier(.2,.85,.24,1);
   box-shadow:0 0 0 1px rgba(232,230,225,.08);
 }
 .expand-scale iframe{display:block;width:100%;height:100%;border:0;background:#fff}
 
 .expand-details{
-  flex:0 0 300px;width:300px;max-height:var(--panel-max-h);overflow-y:auto;padding:var(--s6) var(--s5);
+  flex:0 0 300px;width:300px;max-height:100%;overflow-y:auto;padding:var(--s6) var(--s5);
   display:flex;flex-direction:column;border-right:1px solid var(--edge);
 }
 .ed-kicker{
@@ -163,20 +150,7 @@
 
 @media (max-width:860px){
   .expand-overlay{padding:0}
-  .expand-panel{--panel-max-h:100%;flex-direction:column;width:100%;height:100%;border-radius:0}
+  .expand-panel{flex-direction:column;width:100%;height:100%;border-radius:0}
   .expand-details{order:2;flex:0 0 auto;width:100%;max-height:40vh;border-right:0;border-top:1px solid var(--edge)}
-  /* aspect-ratio:auto overrides the desktop row layout's ratio — on
-     mobile the frame just fills the full width and whatever height is
-     left after .expand-details (flex:1 with the shorthand's flex-basis:0%
-     means "grow to fill remaining space" here, not "start from content
-     size"). Combining aspect-ratio with flex-grow/shrink on the main
-     axis was the bug: a column flex item's cross-axis (width, stretched
-     to 100%) doesn't shrink to match when its main-axis (height) gets
-     flex-shrunk, so the box's real ratio could tear away from what
-     .expand-scale's fit-contain math assumed and collapse to a sliver.
-     Letterboxing above/below the simulated device inside this full-size
-     frame is expected now (e.g. Desktop's landscape ratio inside a tall
-     mobile frame) — .expand-scale's existing fit-contain scale still
-     centres it correctly either way. */
-  .expand-frame-col{order:1;flex:1;width:100%;aspect-ratio:auto;min-height:0}
+  .expand-frame-col{order:1;flex:1;width:100%}
 }

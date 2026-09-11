@@ -62,21 +62,33 @@ const vpToggle  = $('#viewportToggle');
 let currentVp = DESKTOP;
 let openCard = null;
 
-/* --vw/--vh are set on the panel, not the frame-wrap — .expand-frame-col
-   reads them too (via aspect-ratio, see web.css) so the frame's own box
-   shape always matches whatever device is being simulated, rather than
-   the frame having some other shape (from flex/16:9-panel geometry) that
-   the simulated content then has to fit-contain into, leaving a gap on
-   whichever axis doesn't bind. That fit-contain scale on .expand-scale
-   still exists as a safety net for when max-height clamps the aspect-
-   ratio box, but normally now has nothing to correct — both ratios
-   already match. */
+/* the fit-to-frame scale is measured directly with getBoundingClientRect()
+   rather than computed in CSS (container queries, aspect-ratio) — three
+   different pure-CSS approaches here each broke in a different way once
+   the frame column was actually sized by flex-grow in a real layout
+   (row on desktop, column on mobile), so this just measures what the
+   frame wrap's real rendered box is and sets the scale to match, which
+   works the same regardless of how that box ended up that size. Called
+   right after overlay.hidden=false (openSite) or on a toggle click
+   (panel already open, transform already settled to none) — in both
+   cases .expand-panel carries no transform of its own at the moment
+   this runs (the FLIP transform is applied *after* this in openSite),
+   so the measured rect reflects true layout size, not a visually
+   shrunk/enlarged one. */
+function fitScale(vp, animate) {
+  const rect = frameWrap.getBoundingClientRect();
+  const scale = (rect.width > 0 && rect.height > 0)
+    ? Math.min(rect.width / vp.w, rect.height / vp.h)
+    : 1;
+  if (!animate) scaleEl.style.transition = 'none';
+  scaleEl.style.transform = `scale(${scale})`;
+  if (!animate) { void scaleEl.offsetWidth; scaleEl.style.transition = ''; }
+}
 function applyViewport(vp, animate) {
   currentVp = vp;
-  if (!animate) scaleEl.style.transition = 'none';
   panel.style.setProperty('--vw', vp.w + 'px');
   panel.style.setProperty('--vh', vp.h + 'px');
-  if (!animate) { void scaleEl.offsetWidth; scaleEl.style.transition = ''; }
+  fitScale(vp, animate);
   vpToggle.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.vp === (vp === MOBILE ? 'mobile' : 'desktop')));
 }
 vpToggle.addEventListener('click', e => {
@@ -84,6 +96,10 @@ vpToggle.addEventListener('click', e => {
   if (!btn) return;
   applyViewport(btn.dataset.vp === 'mobile' ? MOBILE : DESKTOP, true);
 });
+// the frame wrap's real size can change independently of a viewport
+// toggle (window resize, orientation flip) — re-measure whenever that
+// might have happened while a panel is actually open
+addEventListener('resize', () => { if (!overlay.hidden) fitScale(currentVp, false); }, { passive:true });
 
 function flipFrom(rect) {
   const last = panel.getBoundingClientRect();
