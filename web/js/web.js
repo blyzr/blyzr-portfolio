@@ -109,13 +109,19 @@ function openSite(card) {
 
   overlay.hidden = false;
   iframe.src = `/web/sites/${slug}/index.html`;
-  // a real phone visitor's own frame area is only ~390px wide (the panel
-  // goes fullscreen under 860px — see .expand-overlay in web.css); always
-  // defaulting to the 1080px desktop simulation there reproduces the exact
-  // "tiny" scale-down the grid thumbnails had, just relocated to the
-  // expand panel — default to the MOBILE simulation instead when the
-  // visitor's own viewport is this narrow, matching that breakpoint
-  applyViewport(matchMedia('(max-width:860px)').matches ? MOBILE : DESKTOP, false);
+  // always the desktop simulation by default, on phones included — the
+  // desktop toggle is a landscape-ish ratio, so at a real phone's ~390px
+  // width it derives a comfortably short frame that just fits, no matter
+  // how little vertical room is actually left after .expand-details.
+  // Defaulting to MOBILE there instead (a tall, narrow ratio) meant its
+  // aspect-ratio-derived height regularly exceeded that available room —
+  // only .expand-frame-col can flex-shrink (.expand-details can't), and
+  // shrinking a column flex item's main-axis size doesn't shrink its
+  // stretched cross-axis size to match, so the box's real aspect ratio
+  // broke away from what .expand-scale's fit-contain math assumed,
+  // which could resolve to an effectively invisible sliver. The Mobile
+  // toggle is still right there if someone wants the phone simulation.
+  applyViewport(DESKTOP, false);
 
   const startRect = card.getBoundingClientRect();
   panel.classList.remove('animating');
