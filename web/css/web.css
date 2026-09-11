@@ -71,8 +71,15 @@
 .expand-overlay.on{background:rgba(10,10,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .expand-overlay[hidden]{display:none}
 
+/* the frame column sits above the details, full panel width, at a fixed
+   16:9 aspect ratio rather than sharing width with a side sidebar — that
+   old side-by-side layout only gave the frame ~68% of the panel's width,
+   which meant simulating even a modest 1080px "desktop" needed a heavy
+   shrink to fit. Full width at 16:9 lands close to 1:1 for a 1080-1280px
+   wide panel, which is what actually makes it read as a desktop visit
+   rather than something shrunk down. */
 .expand-panel{
-  position:relative;display:flex;gap:0;width:min(1180px,100%);height:min(760px,86vh);
+  position:relative;display:flex;flex-direction:column;width:min(1180px,100%);max-height:90vh;
   background:var(--surface);border:1px solid var(--edge);border-radius:var(--r2);overflow:hidden;
   transform-origin:top left;will-change:transform;box-shadow:0 40px 100px rgba(0,0,0,.5);
 }
@@ -85,7 +92,7 @@
 }
 .expand-close:hover{background:rgba(15,15,15,.85)}
 
-.expand-frame-col{position:relative;flex:1 1 68%;min-width:0;background:#0a0a0a;display:flex;flex-direction:column}
+.expand-frame-col{position:relative;width:100%;aspect-ratio:16/9;flex:none;background:#0a0a0a}
 .viewport-toggle{
   position:absolute;top:var(--s4);left:var(--s4);z-index:5;display:flex;gap:2px;
   background:rgba(15,15,15,.6);border:1px solid rgba(232,230,225,.18);border-radius:100px;padding:3px;
@@ -100,18 +107,15 @@
 
 /* container-type:size (not inline-size) gives both cqw and cqh, so the
    min(...) below can do a real "fit contain" — the frame wrap's own size
-   comes from flex:1 in a flex column, a definite extrinsic size, which is
-   what container-type:size requires. --vw/--vh are the only things JS
-   sets (see applyViewport in web.js); CSS does the actual fit-scaling
-   reactively, so there's nothing that can go stale on resize/reflow. */
-/* top-aligned, not centered: a real browser starts at the page's own top,
-   it doesn't float the viewport around the page's vertical middle — with
-   .expand-scale usually shorter than the wrap (see DESKTOP/MOBILE in
-   web.js), centering was splitting empty space evenly above and below,
-   which read as the header sitting oddly far down rather than right at
-   the top the way an actual visit to the site would */
+   comes from position:absolute;inset:0 filling the aspect-ratio box above,
+   a definite extrinsic size, which is what container-type:size requires.
+   --vw/--vh are the only things JS sets (see applyViewport in web.js);
+   CSS does the actual fit-scaling reactively, so there's nothing that can
+   go stale on resize/reflow. Top-aligned, not centered: a real browser
+   starts at the page's own top rather than floating the viewport around
+   the page's vertical middle. */
 .expand-frame-wrap{
-  flex:1;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
+  position:absolute;inset:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
   container-type:size;--vw:1080px;--vh:675px;
 }
 .expand-scale{
@@ -123,7 +127,7 @@
 .expand-scale iframe{display:block;width:100%;height:100%;border:0;background:#fff}
 
 .expand-details{
-  flex:1 1 32%;min-width:220px;max-width:340px;padding:var(--s6) var(--s5);overflow-y:auto;
+  flex:1;min-height:0;overflow-y:auto;padding:var(--s5) var(--s6);
   display:flex;flex-direction:column;
 }
 .ed-kicker{
@@ -134,11 +138,10 @@
 .ed-sub{margin:0 0 var(--s3);font-size:13.5px;color:var(--subtle);line-height:1.5}
 .ed-blurb{margin:0 0 var(--s4);font-size:12.5px;color:var(--muted);line-height:1.5}
 .expand-details .tools{margin-bottom:var(--s4)}
-.expand-details .row-link{margin-top:auto}
+.expand-details .row-link{margin-top:0}
 
 @media (max-width:860px){
   .expand-overlay{padding:0}
-  .expand-panel{flex-direction:column;width:100%;height:100%;border-radius:0}
-  .expand-frame-col{flex:1 1 auto}
-  .expand-details{max-width:none;flex:0 0 auto;max-height:38vh}
+  .expand-panel{width:100%;max-height:100%;height:100%;border-radius:0}
+  .expand-frame-col{aspect-ratio:auto;flex:1 1 auto}
 }

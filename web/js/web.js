@@ -7,13 +7,13 @@ const sites = [
     tags:['WordPress','PHP','MySQL','JS'], ink:'#c0392b', link:'https://mikhailmehra.com' },
   { slug:'verdant', name:'Verdant', kicker:'02 · SaaS landing page', sub:'Shopify growth subscription — pricing-led landing page.',
     blurb:'A predictable-subscription pitch for a Shopify CRO and design agency, built around plans, process, and proof.',
-    tags:['HTML','CSS','JS'], ink:'#557143', link:'/web/sites/verdant/index.html' },
+    tags:['HTML','CSS','JS'], ink:'#557143' },
   { slug:'blossom', name:'Blossom Perfumery', kicker:'03 · Storefront homepage', sub:'Designer-inspired fragrance, direct-to-consumer.',
     blurb:'A boutique fragrance storefront built around real product photography, pricing, and a warm, editorial brand voice.',
-    tags:['HTML','CSS','JS'], ink:'#c79a3d', link:'/web/sites/blossom/index.html' },
+    tags:['HTML','CSS','JS'], ink:'#c79a3d' },
   { slug:'whiteelm', name:'White Elm', kicker:'04 · Storefront homepage', sub:'Convertible bag brand, women-led and versatile.',
     blurb:'A product-led homepage for a convertible bag brand, built around lifestyle photography and customer testimonials.',
-    tags:['HTML','CSS','JS'], ink:'#d9c2a0', link:'/web/sites/whiteelm/index.html' },
+    tags:['HTML','CSS','JS'], ink:'#d9c2a0' },
 ];
 
 const $ = sel => document.querySelector(sel);
