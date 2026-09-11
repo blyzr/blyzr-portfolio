@@ -21,16 +21,6 @@ const MARK_DOCK_PX = 17;
 const DOCK_DURATION = 0.78;
 const READING_ZONE = 0.42;
 
-// filter-bar categories are coarser than the display `kind` (which still
-// shows as-is in row-meta) — Artwork/App/Album/Editorial all read as one
-// "Visual" bucket for filtering purposes; Site funnels into the standalone
-// Web showcase page instead of an in-place filter (see .filter-web)
-const KIND_CAT = {
-  Identity:'identity', Artwork:'visual', App:'visual', Album:'visual', Editorial:'visual',
-  Motion:'motion', Product:'product', Site:'web'
-};
-const catOf = p => KIND_CAT[p.kind] || 'visual';
-
 const projects = [
   { name:'Koru', kind:'Identity', year:'', art:'a11', ink:'#4a8f6b', ratio:1.664,
     images:['koru.png'],
@@ -204,7 +194,7 @@ projects.forEach(p => { p.ink = satFloor(p.ink, 0.5); });
 
 /* --- markup ------------------------------------------------------------- */
 $('#list').innerHTML = projects.map((p, i) => `
-  <button class="row" type="button" data-i="${i}" data-cat="${catOf(p)}" style="--pa:${p.ink}">
+  <button class="row" type="button" data-i="${i}" style="--pa:${p.ink}">
     <span class="row-top">
       <span class="row-name">${p.name}</span>
       <span class="row-blurb">${p.blurb}</span>
@@ -237,7 +227,7 @@ $('#prev').innerHTML = projects.map((p, i) => {
 }).join('');
 
 $('#bands').innerHTML = projects.map((p, i) => `
-  <button class="band" type="button" data-i="${i}" data-cat="${catOf(p)}" style="--pa:${p.ink}">
+  <button class="band" type="button" data-i="${i}" style="--pa:${p.ink}">
     <span class="band-top">
       <span class="txt"><h3>${p.name}</h3><span class="meta">${meta(i, p)}</span></span>
     </span>
@@ -540,43 +530,6 @@ bands.forEach(band => {
     stale = true;
   });
 });
-
-/* --- filters --------------------------------------------------------------
-   one shared filter bar exists in both stages (desktop + mobile specimen)
-   so switching orientation mid-session keeps the same category active —
-   only the .filter buttons that carry data-cat are wired here; the Web
-   pill is a real <a href="/web/"> with no data-cat, so it's excluded by
-   the selector below and just navigates normally. */
-const filterBtns = [...document.querySelectorAll('.filter[data-cat]')];
-let activeFilter = 'all';
-
-function setFilter(cat) {
-  activeFilter = cat;
-  filterBtns.forEach(b => b.classList.toggle('on', b.dataset.cat === cat));
-
-  const targets = mobile ? bands : rows;
-  let firstVisible = -1;
-  targets.forEach(el => {
-    const match = cat === 'all' || el.dataset.cat === cat;
-    el.classList.toggle('is-hidden', !match);
-    if (match && firstVisible < 0) firstVisible = +el.dataset.i;
-  });
-  if (firstVisible < 0) firstVisible = 0; // every category has at least one project
-
-  if (mobile) {
-    if (openBandIndex >= 0 && bands[openBandIndex].classList.contains('is-hidden')) {
-      bands[openBandIndex].classList.remove('open');
-      openBandIndex = -1;
-    }
-  } else {
-    if (openIndex >= 0 && rows[openIndex].classList.contains('is-hidden')) closeProject();
-    if (rows[previewIndex].classList.contains('is-hidden')) showPreview(firstVisible);
-  }
-  stale = true;
-  layout();
-}
-
-filterBtns.forEach(b => b.addEventListener('click', () => setFilter(b.dataset.cat)));
 
 /* --- lightbox ------------------------------------------------------------
    the preview and band galleries both crop (cover/fixed-ratio) so the grid

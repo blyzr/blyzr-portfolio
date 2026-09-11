@@ -17,22 +17,15 @@ const sites = [
 ];
 
 const $ = sel => document.querySelector(sel);
-// 1200, not a full 1440/1920 — every site's own mobile breakpoint
-// (820-940px) clears 1200 with real margin to spare, so this still
-// renders the real desktop layout without needing a heavy shrink to fit;
-// wider than the 1080 this started at, kept as extra headroom.
-//
-// The *height* (905, not a more "desktop-shaped" 16:10 ratio) is chosen
-// to match the expand panel's actual frame area's own aspect ratio, not
-// real monitor proportions: the panel is a fixed 16:9 box (see .expand-
-// panel in web.css) with a 300px-wide details column eating into that
-// width, so at the panel's normal ~1180px width the frame area works out
-// to ~880 x 664 (ratio ~1.326). 1200/905 = ~1.326 — matching it means the
-// fit-contain scale in .expand-scale lands the same on both axes, so the
-// iframe actually fills the frame instead of leaving a letterboxed gap
-// on whichever axis doesn't bind. If the details column width or the
-// panel's aspect-ratio ever changes, this needs recalculating to match.
-const DESKTOP = { w:1200, h:905 };
+// a plain, realistic 16:10 desktop size — no longer hand-calibrated
+// against the panel's own geometry (that broke the instant the panel
+// wasn't exactly the one width it was calibrated for, which is most of
+// the time — confirmed by screenshots still showing a large empty gap).
+// .expand-frame-col's aspect-ratio now reads --vw/--vh directly (see
+// web.css), so the frame's own shape always matches whichever of these
+// is active instead of the other way around. 1280 clears every site's
+// own mobile breakpoint (820-940px) with real margin to spare.
+const DESKTOP = { w:1280, h:800 };
 const MOBILE  = { w:390,  h:844 };
 
 /* --- grid markup ----------------------------------------------------------- */
@@ -69,14 +62,20 @@ const vpToggle  = $('#viewportToggle');
 let currentVp = DESKTOP;
 let openCard = null;
 
-/* the actual fit-to-frame scaling is a CSS container query on .expand-scale
-   (see web.css) — this just tells CSS which real device size to target via
-   --vw/--vh, so there's no JS measurement to go stale on resize/reflow. */
+/* --vw/--vh are set on the panel, not the frame-wrap — .expand-frame-col
+   reads them too (via aspect-ratio, see web.css) so the frame's own box
+   shape always matches whatever device is being simulated, rather than
+   the frame having some other shape (from flex/16:9-panel geometry) that
+   the simulated content then has to fit-contain into, leaving a gap on
+   whichever axis doesn't bind. That fit-contain scale on .expand-scale
+   still exists as a safety net for when max-height clamps the aspect-
+   ratio box, but normally now has nothing to correct — both ratios
+   already match. */
 function applyViewport(vp, animate) {
   currentVp = vp;
   if (!animate) scaleEl.style.transition = 'none';
-  frameWrap.style.setProperty('--vw', vp.w + 'px');
-  frameWrap.style.setProperty('--vh', vp.h + 'px');
+  panel.style.setProperty('--vw', vp.w + 'px');
+  panel.style.setProperty('--vh', vp.h + 'px');
   if (!animate) { void scaleEl.offsetWidth; scaleEl.style.transition = ''; }
   vpToggle.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.vp === (vp === MOBILE ? 'mobile' : 'desktop')));
 }
@@ -153,5 +152,16 @@ cards.forEach(card => card.addEventListener('click', () => openSite(card)));
 $('#expandClose').addEventListener('click', closeSite);
 overlay.addEventListener('click', e => { if (e.target === overlay) closeSite(); });
 addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeSite(); });
+
+/* --- header --------------------------------------------------------------
+   matches home's docked-header look (main.css's .hd already reads
+   var(--hp,0) for its background/blur/border) without home's continuous
+   scroll-linked tick() loop — just flips --hp between 0 and 1 on a fixed
+   threshold, with the CSS transition on .web-hd standing in for the
+   per-frame easing home gets instead. */
+const hd = $('.web-hd');
+addEventListener('scroll', () => {
+  hd.style.setProperty('--hp', scrollY > 40 ? 1 : 0);
+}, { passive:true });
 
 })();

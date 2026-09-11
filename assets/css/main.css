@@ -217,10 +217,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .split-row{display:flex;gap:var(--s5);align-items:flex-start}
 
 /* --- filters -------------------------------------------------------------
-   category chips above the list — filtering hides non-matching rows/bands
-   via .is-hidden (see setFilter in main.js) rather than re-rendering.
-   Web is a real <a>, not a toggle: it carries no data-cat so main.js's
-   selector skips it, and it just navigates to the standalone showcase. */
+   just the Web pill now (category filtering was removed) — kept as its
+   own .filters wrapper for the same spacing above the list either way. */
 .filters{display:flex;flex-wrap:wrap;gap:var(--s3);margin-bottom:var(--s5)}
 .filter{
   display:inline-flex;align-items:center;gap:5px;
@@ -230,19 +228,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   padding:var(--s2) var(--s4);cursor:pointer;
   transition:color .25s,border-color .25s,background .25s;
 }
-.filter:hover{color:var(--text);border-color:color-mix(in srgb,var(--accent) 40%,var(--edge))}
-.filter.on{color:var(--base);background:var(--accent);border-color:var(--accent)}
 .filter:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .filter-web{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
 .filter-web:hover{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
 .filter .arr{font-size:11px;transition:transform .25s}
 .filter-web:hover .arr{transform:translate(1px,-1px)}
-
-/* compound selectors, not a bare .is-hidden{display:none} — .row and .band
-   both set their own display:block later in this file, and a bare single-
-   class .is-hidden would tie with them on specificity and lose on source
-   order, never actually hiding anything */
-.row.is-hidden,.band.is-hidden{display:none}
 
 .panel{
   flex:1 1 56%;min-width:0;border-radius:var(--r2);
