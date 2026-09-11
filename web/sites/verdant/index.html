@@ -78,9 +78,8 @@ a{color:inherit}
 .section{padding:56px 24px}
 .section.tint{background:var(--bg)}
 
-/* section 1 feature cards — icon+heading+copy on top, the real feature
-   image below via .card-img (the icon is a small 55x55 glyph; the feature
-   image is a full-width photo/illustration, not the same asset scaled down) */
+/* section 1 feature cards — icon+heading+copy, plus a small hand-drawn
+   SVG diagram per card instead of a stock photo (see .diagram below) */
 .cards-1{display:flex;flex-direction:column;gap:20px;max-width:1020px;margin:44px auto 0}
 .card{background:var(--bg);border:1px solid var(--ink);border-radius:10px;padding:40px;display:flex;flex-direction:column;gap:24px}
 .card-row{display:flex;flex-direction:column;gap:24px}
@@ -89,9 +88,27 @@ a{color:inherit}
 .feat-icon{width:40px;height:40px;flex:none;color:var(--ink)}
 .feat-text h3{font-size:24px;margin-bottom:8px}
 .feat-text p{opacity:.9}
-.card-img{border-radius:8px;overflow:hidden}
-.card-img img{width:100%;height:auto;display:block}
-.card-img-float{float:right;width:180px;max-width:40%;margin:0 0 14px 20px;border-radius:8px;display:block}
+
+.diagram{display:block;width:100%;height:auto}
+.diagram-float{float:right;width:180px;max-width:42%;margin:0 0 14px 20px}
+.diagram-revenue,.diagram-flow{margin-top:6px}
+/* the revenue line draws itself in once its card scrolls into view — see
+   .reveal.in below, which is what actually adds the trigger class */
+.graph-actual{stroke-dasharray:600;stroke-dashoffset:600;transition:stroke-dashoffset 1.6s cubic-bezier(.2,.85,.24,1) .1s}
+.graph-dot{opacity:0;transition:opacity .3s ease 1.5s}
+.reveal.in .graph-actual{stroke-dashoffset:0}
+.reveal.in .graph-dot{opacity:1}
+
+/* --- scroll reveal ---------------------------------------------------------
+   fade + lift once a block is ~15% into the viewport (see the
+   IntersectionObserver in the script at the bottom) */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.85,.24,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .graph-actual{stroke-dashoffset:0;transition:none}
+  .graph-dot{opacity:1;transition:none}
+}
 
 /* section 2 grid — hand-drawn line icons, one per benefit, same stroke
    style throughout rather than reused Figma raster thumbnails */
@@ -174,7 +191,7 @@ footer a{opacity:.8;text-decoration:none}
   .process{grid-template-columns:1fr 1fr}
   .collab{grid-template-columns:1fr}
   .pricing{grid-template-columns:1fr}
-  .card-img-float{float:none;width:100%;max-width:100%;margin:14px 0 0}
+  .diagram-float{float:none;width:100%;max-width:100%;margin:14px 0 0}
 }
 @media (max-width:520px){
   .grid-3{grid-template-columns:1fr}
@@ -223,36 +240,58 @@ footer a{opacity:.8;text-decoration:none}
 
 <section class="section" id="services">
   <div class="cards-1">
-    <div class="card card-row">
+    <div class="card card-row reveal">
       <div class="feat-top">
-        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
         <div class="feat-text">
           <h3>Quicker Wins, Bigger Payoffs</h3>
-          <img class="card-img-float" src="img/feature-1.webp" alt="">
+          <svg class="diagram diagram-float" viewBox="0 0 200 130" fill="none">
+            <rect x="14" y="82" width="26" height="38" rx="3" fill="var(--ink)" opacity=".25"/>
+            <rect x="58" y="58" width="26" height="62" rx="3" fill="var(--ink)" opacity=".45"/>
+            <rect x="102" y="34" width="26" height="86" rx="3" fill="var(--bright)" opacity=".75"/>
+            <rect x="146" y="12" width="26" height="108" rx="3" fill="var(--bright)"/>
+            <path d="M18 88 L64 62 L108 38 L158 18" stroke="var(--bright)" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 5" opacity=".6"/>
+          </svg>
           <p>Every decision is backed by data and design craft, so conversions climb and your return on investment gets stronger store-wide.</p>
         </div>
       </div>
     </div>
     <div class="card-row split">
-      <div class="card">
+      <div class="card reveal diagram-graph">
         <div class="feat-top">
-          <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 006 5.3"/><path d="M4 13a8 8 0 0014 5.7"/><path d="M4 4v5h5"/><path d="M20 20v-5h-5"/></svg>
+          <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 006 5.3"/><path d="M4 13a8 8 0 0014 5.7"/><path d="M4 4v5h5"/><path d="M20 20v-5h-5"/></svg>
           <div class="feat-text">
             <h3>Consistent Outcomes, Every Cycle</h3>
             <p>One seamless subscription gives you steady access to CRO, design, and development — all shaped around growing your Shopify store efficiently, no guesswork required.</p>
           </div>
         </div>
-        <div class="card-img"><img src="img/feature-2.webp" alt=""></div>
+        <svg class="diagram diagram-revenue" viewBox="0 0 400 160" fill="none">
+          <line x1="16" y1="136" x2="384" y2="136" stroke="var(--ink)" stroke-opacity=".2" stroke-width="1"/>
+          <text x="16" y="20" font-family="Darker Grotesque,sans-serif" font-size="12" font-weight="600" fill="var(--ink)" opacity=".55">Predicted</text>
+          <text x="16" y="38" font-family="Darker Grotesque,sans-serif" font-size="12" font-weight="600" fill="var(--bright)">Actual revenue</text>
+          <path class="graph-predicted" d="M16,116 C90,104 140,72 200,58 C260,46 320,30 384,12" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 6" stroke-opacity=".45" stroke-linecap="round"/>
+          <path class="graph-actual" d="M16,126 C80,120 120,94 180,82 C240,70 300,52 384,40" stroke="var(--bright)" stroke-width="3" stroke-linecap="round"/>
+          <circle class="graph-dot" cx="384" cy="40" r="5" fill="var(--bright)"/>
+        </svg>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="feat-top">
-          <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg>
+          <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg>
           <div class="feat-text">
             <h3>From Concept to Live in Two Days</h3>
             <p>Rapid turnarounds mean meaningful A/B tests, polished designs, and fresh updates land within 48 hours.</p>
           </div>
         </div>
-        <div class="card-img"><img src="img/feature-3.webp" alt=""></div>
+        <svg class="diagram diagram-flow" viewBox="0 0 200 130" fill="none">
+          <path d="M26 62 L174 62" stroke="var(--ink)" stroke-opacity=".25" stroke-width="2"/>
+          <circle cx="26" cy="62" r="8" fill="var(--ink)" opacity=".35"/>
+          <circle cx="100" cy="62" r="8" fill="var(--bright)" opacity=".75"/>
+          <circle cx="174" cy="62" r="9" fill="var(--bright)"/>
+          <path d="M169 55l9 7-9 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="26" y="92" font-family="Darker Grotesque,sans-serif" font-size="13" fill="var(--ink)" text-anchor="middle" opacity=".7">Idea</text>
+          <text x="100" y="92" font-family="Darker Grotesque,sans-serif" font-size="13" fill="var(--ink)" text-anchor="middle" opacity=".7">Build</text>
+          <text x="174" y="92" font-family="Darker Grotesque,sans-serif" font-size="13" font-weight="600" fill="var(--ink)" text-anchor="middle">Live</text>
+        </svg>
       </div>
     </div>
     <div style="text-align:center"><a class="btn btn-primary" href="#plans">View plans</a></div>
@@ -265,33 +304,33 @@ footer a{opacity:.8;text-decoration:none}
     <h2>Everything included</h2>
   </div>
   <div class="grid-3">
-    <div class="benefit">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+    <div class="benefit reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
       <h3>Lift Conversions</h3>
       <p>Every design tweak, test, and optimization is aimed at lifting conversions and growing revenue.</p>
     </div>
-    <div class="benefit">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 001 1h2l10 5V4L6 9H4a1 1 0 00-1 1z"/><path d="M16 9a3 3 0 010 6"/></svg>
+    <div class="benefit reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 001 1h2l10 5V4L6 9H4a1 1 0 00-1 1z"/><path d="M16 9a3 3 0 010 6"/></svg>
       <h3>High-Performing Ad Creative</h3>
       <p>Bespoke ad creative built to stop the scroll and turn clicks into customers, wherever you advertise.</p>
     </div>
-    <div class="benefit">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+    <div class="benefit reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
       <h3>Emails That Convert</h3>
       <p>From automated flows to one-off campaigns, our email designs are built to perform, not just look good.</p>
     </div>
-    <div class="benefit">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+    <div class="benefit reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
       <h3>Insight-Led Growth</h3>
       <p>We dig into your store's performance data and put proven CRO tactics and A/B tests to work.</p>
     </div>
-    <div class="benefit">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6z"/></svg>
+    <div class="benefit reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6z"/></svg>
       <h3>Total Independence</h3>
       <p>A CRO team on tap, with none of the micromanaging or endless back-and-forth — just outcomes.</p>
     </div>
-    <div class="benefit">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+    <div class="benefit reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
       <h3>One Team, Every Need</h3>
       <p>Landing pages, product imagery, whatever comes up — one team handles the whole request list.</p>
     </div>
@@ -305,16 +344,16 @@ footer a{opacity:.8;text-decoration:none}
     <h2>Simple to start</h2>
   </div>
   <div class="process">
-    <div class="step"><h3>✍️ Share your goals</h3><p>A short onboarding form captures your store's challenges and targets, so we know exactly where to focus for maximum growth.</p></div>
-    <div class="step"><h3>🛠️ We build your roadmap</h3><p>We audit your Shopify store, align with your brand's vision, and map out a plan built to lift profit per visitor.</p></div>
-    <div class="step"><h3>🚀 Send requests right away</h3><p>Queue up A/B tests, design tweaks, or custom builds whenever you need them — we prioritize and ship fast, so growth never stalls.</p></div>
-    <div class="step"><h3>📈 Watch the numbers move</h3><p>Conversions climb, profit per visitor improves, operations get simpler — all from one predictable subscription that grows alongside you.</p></div>
+    <div class="step reveal"><h3>✍️ Share your goals</h3><p>A short onboarding form captures your store's challenges and targets, so we know exactly where to focus for maximum growth.</p></div>
+    <div class="step reveal"><h3>🛠️ We build your roadmap</h3><p>We audit your Shopify store, align with your brand's vision, and map out a plan built to lift profit per visitor.</p></div>
+    <div class="step reveal"><h3>🚀 Send requests right away</h3><p>Queue up A/B tests, design tweaks, or custom builds whenever you need them — we prioritize and ship fast, so growth never stalls.</p></div>
+    <div class="step reveal"><h3>📈 Watch the numbers move</h3><p>Conversions climb, profit per visitor improves, operations get simpler — all from one predictable subscription that grows alongside you.</p></div>
   </div>
   <div class="center-btn"><a class="btn btn-primary" href="#plans">View plans</a></div>
 </section>
 
 <section class="section tint">
-  <div class="quote-card">
+  <div class="quote-card reveal">
     <q>The whole process, start to finish, was smooth and well communicated. We set out to improve our conversion rate, and that's exactly what happened — money well spent.</q>
     <cite>Owen Faulkner</cite>
   </div>
@@ -345,7 +384,7 @@ footer a{opacity:.8;text-decoration:none}
   </div>
 
   <div class="pricing">
-    <div class="plan standard">
+    <div class="plan standard reveal">
       <h2>Standard</h2>
       <p class="price">$3,995/month</p>
       <p class="desc">One request at a time. Pause or cancel anytime.</p>
@@ -359,7 +398,7 @@ footer a{opacity:.8;text-decoration:none}
       <a class="btn btn-light" style="align-self:flex-start" href="#">Get started</a>
       <p class="foot">or schedule a call</p>
     </div>
-    <div class="plan premium">
+    <div class="plan premium reveal">
       <h2>Premium</h2>
       <p class="price">$6,995/month</p>
       <p class="desc">Two requests in parallel. Pause or cancel anytime.</p>
@@ -410,6 +449,15 @@ document.querySelectorAll('.faq-q').forEach(btn=>{
     if(!wasOpen) item.classList.add('open');
   });
 });
+
+const revealIO = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    e.target.classList.add('in');
+    revealIO.unobserve(e.target);
+  });
+},{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.reveal').forEach(el=>revealIO.observe(el));
 </script>
 <script src="/assets/preloader/preloader.js"></script>
 </body>

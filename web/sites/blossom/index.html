@@ -89,7 +89,8 @@ a{color:inherit;text-decoration:none}
 .banner::after{content:"";position:absolute;inset:0;background:rgba(38,34,32,.62);z-index:0}
 .banner-copy{position:relative;z-index:1;color:#fff;max-width:520px;padding:0 24px}
 .banner-copy .eyebrow{color:var(--gold);margin-bottom:14px}
-.banner-copy h2{color:#fff;font-size:clamp(28px,4vw,44px);margin-bottom:18px}
+.banner-copy h2{color:#fff;font-size:clamp(28px,4vw,44px);margin-bottom:10px}
+.banner-textbox{background:rgba(58,51,47,.72);border-radius:3px;padding:20px 24px;margin-bottom:24px}
 
 /* newsletter */
 .news{background:var(--lilac);padding:60px 28px;text-align:center}
@@ -213,8 +214,10 @@ footer{background:var(--ink);color:var(--cream);padding:56px 28px 30px}
   <img src="img/bottle-botanical.webp" alt="">
   <div class="banner-copy">
     <span class="eyebrow">For Everyone</span>
-    <h2>One bottle. No labels.</h2>
-    <p style="color:#efeae6">Our unisex line — botanical, warm, built to be shared.</p>
+    <div class="banner-textbox">
+      <h2>One bottle. No labels.</h2>
+      <p style="color:#efeae6">Our unisex line — botanical, warm, built to be shared.</p>
+    </div>
     <a class="btn btn-gold" href="#">Shop unisex</a>
   </div>
 </div>
