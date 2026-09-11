@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Recursive:CASL,CRSV,MONO,slnt,wght@0..1,0..1,0..1,-15..0,300..1000&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/main.css">
-<link rel="stylesheet" href="/web/css/web.css?v=3">
+<link rel="stylesheet" href="/web/css/web.css?v=4">
 </head>
 <body>
 
@@ -42,6 +42,14 @@
 <div class="expand-overlay" id="expandOverlay" hidden>
   <div class="expand-panel" id="expandPanel">
     <button class="expand-close" id="expandClose" type="button" aria-label="Close">&times;</button>
+    <div class="expand-details">
+      <span class="ed-kicker" id="edKicker"></span>
+      <h2 id="edTitle"></h2>
+      <p class="ed-sub" id="edSub"></p>
+      <p class="ed-blurb" id="edBlurb"></p>
+      <span class="tools" id="edTags"></span>
+      <a class="row-link" id="edLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Open live site &#8599;</a>
+    </div>
     <div class="expand-frame-col">
       <div class="viewport-toggle" id="viewportToggle">
         <button type="button" data-vp="desktop" class="on" aria-label="Desktop view">
@@ -57,17 +65,9 @@
         </div>
       </div>
     </div>
-    <div class="expand-details">
-      <span class="ed-kicker" id="edKicker"></span>
-      <h2 id="edTitle"></h2>
-      <p class="ed-sub" id="edSub"></p>
-      <p class="ed-blurb" id="edBlurb"></p>
-      <span class="tools" id="edTags"></span>
-      <a class="row-link" id="edLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Open live site &#8599;</a>
-    </div>
   </div>
 </div>
 
-<script src="/web/js/web.js?v=3"></script>
+<script src="/web/js/web.js?v=4"></script>
 </body>
 </html>

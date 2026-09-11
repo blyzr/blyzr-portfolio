@@ -71,15 +71,17 @@
 .expand-overlay.on{background:rgba(10,10,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .expand-overlay[hidden]{display:none}
 
-/* the frame column sits above the details, full panel width, at a fixed
-   16:9 aspect ratio rather than sharing width with a side sidebar — that
-   old side-by-side layout only gave the frame ~68% of the panel's width,
-   which meant simulating even a modest 1080px "desktop" needed a heavy
-   shrink to fit. Full width at 16:9 lands close to 1:1 for a 1080-1280px
-   wide panel, which is what actually makes it read as a desktop visit
-   rather than something shrunk down. */
+/* the modal itself is a fixed 16:9 box, details column on the left at a
+   fixed width, frame filling the rest — side-by-side again (a stacked
+   frame-over-details layout read fine but made the details column too
+   narrow/tall-text to stay legible). DESKTOP's own aspect ratio (see
+   web.js) is deliberately chosen to match this frame area's shape at the
+   panel's normal (non-mobile-clamped) size, so the fit-contain scale in
+   .expand-scale lands the same on both axes and the iframe actually
+   fills the frame with no leftover letterboxing gap — see the comment
+   there for the math. */
 .expand-panel{
-  position:relative;display:flex;flex-direction:column;width:min(1180px,100%);max-height:90vh;
+  position:relative;display:flex;flex-direction:row;width:min(1180px,100%);aspect-ratio:16/9;max-height:90vh;
   background:var(--surface);border:1px solid var(--edge);border-radius:var(--r2);overflow:hidden;
   transform-origin:top left;will-change:transform;box-shadow:0 40px 100px rgba(0,0,0,.5);
 }
@@ -92,7 +94,7 @@
 }
 .expand-close:hover{background:rgba(15,15,15,.85)}
 
-.expand-frame-col{position:relative;width:100%;aspect-ratio:16/9;flex:none;background:#0a0a0a}
+.expand-frame-col{position:relative;flex:1;min-width:0;height:100%;background:#0a0a0a}
 .viewport-toggle{
   position:absolute;top:var(--s4);left:var(--s4);z-index:5;display:flex;gap:2px;
   background:rgba(15,15,15,.6);border:1px solid rgba(232,230,225,.18);border-radius:100px;padding:3px;
@@ -116,7 +118,7 @@
    the page's vertical middle. */
 .expand-frame-wrap{
   position:absolute;inset:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
-  container-type:size;--vw:1080px;--vh:675px;
+  container-type:size;--vw:1080px;--vh:815px;
 }
 .expand-scale{
   width:var(--vw);height:var(--vh);transform-origin:top left;
@@ -127,8 +129,8 @@
 .expand-scale iframe{display:block;width:100%;height:100%;border:0;background:#fff}
 
 .expand-details{
-  flex:1;min-height:0;overflow-y:auto;padding:var(--s5) var(--s6);
-  display:flex;flex-direction:column;
+  flex:0 0 300px;width:300px;height:100%;overflow-y:auto;padding:var(--s6) var(--s5);
+  display:flex;flex-direction:column;border-right:1px solid var(--edge);
 }
 .ed-kicker{
   font-variation-settings:"MONO" 1;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
@@ -138,10 +140,11 @@
 .ed-sub{margin:0 0 var(--s3);font-size:13.5px;color:var(--subtle);line-height:1.5}
 .ed-blurb{margin:0 0 var(--s4);font-size:12.5px;color:var(--muted);line-height:1.5}
 .expand-details .tools{margin-bottom:var(--s4)}
-.expand-details .row-link{margin-top:0}
+.expand-details .row-link{margin-top:auto;padding-top:var(--s4)}
 
 @media (max-width:860px){
   .expand-overlay{padding:0}
-  .expand-panel{width:100%;max-height:100%;height:100%;border-radius:0}
-  .expand-frame-col{aspect-ratio:auto;flex:1 1 auto}
+  .expand-panel{flex-direction:column;width:100%;aspect-ratio:auto;max-height:100%;height:100%;border-radius:0}
+  .expand-details{order:2;flex:0 0 auto;width:100%;height:auto;max-height:40vh;border-right:0;border-top:1px solid var(--edge)}
+  .expand-frame-col{order:1;flex:1 1 auto}
 }

@@ -17,12 +17,21 @@ const sites = [
 ];
 
 const $ = sel => document.querySelector(sel);
-// 1080, not a full 1440/1920 — every site's own mobile breakpoint (820-940px)
-// clears 1080 comfortably, so this still renders the real desktop layout,
-// but the expand panel's actual frame area is only ~840x760 at most, so a
-// 1440-wide target was forcing a ~0.58x shrink for no benefit; 1080 fits
-// at a much more legible ~0.78x
-const DESKTOP = { w:1080, h:675 };
+// 1080, not a full 1440/1920 — every site's own mobile breakpoint
+// (820-940px) clears 1080 comfortably, so this still renders the real
+// desktop layout without needing a heavy shrink to fit.
+//
+// The *height* (815, not the more "desktop-shaped" 675 = 16:10) is chosen
+// to match the expand panel's actual frame area's own aspect ratio, not
+// real monitor proportions: the panel is a fixed 16:9 box (see .expand-
+// panel in web.css) with a 300px-wide details column eating into that
+// width, so at the panel's normal ~1180px width the frame area works out
+// to ~880 x 664 (ratio ~1.326). 1080/815 = ~1.325 — matching it means the
+// fit-contain scale in .expand-scale lands the same on both axes, so the
+// iframe actually fills the frame instead of leaving a letterboxed gap
+// on whichever axis doesn't bind. If the details column width or the
+// panel's aspect-ratio ever changes, this needs recalculating to match.
+const DESKTOP = { w:1080, h:815 };
 const MOBILE  = { w:390,  h:844 };
 
 /* --- grid markup ----------------------------------------------------------- */
