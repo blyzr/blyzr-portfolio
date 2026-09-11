@@ -17,7 +17,12 @@ const sites = [
 ];
 
 const $ = sel => document.querySelector(sel);
-const DESKTOP = { w:1440, h:900 };
+// 1080, not a full 1440/1920 — every site's own mobile breakpoint (820-940px)
+// clears 1080 comfortably, so this still renders the real desktop layout,
+// but the expand panel's actual frame area is only ~840x760 at most, so a
+// 1440-wide target was forcing a ~0.58x shrink for no benefit; 1080 fits
+// at a much more legible ~0.78x
+const DESKTOP = { w:1080, h:675 };
 const MOBILE  = { w:390,  h:844 };
 
 /* --- grid markup ----------------------------------------------------------- */

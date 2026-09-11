@@ -104,9 +104,15 @@
    what container-type:size requires. --vw/--vh are the only things JS
    sets (see applyViewport in web.js); CSS does the actual fit-scaling
    reactively, so there's nothing that can go stale on resize/reflow. */
+/* top-aligned, not centered: a real browser starts at the page's own top,
+   it doesn't float the viewport around the page's vertical middle — with
+   .expand-scale usually shorter than the wrap (see DESKTOP/MOBILE in
+   web.js), centering was splitting empty space evenly above and below,
+   which read as the header sitting oddly far down rather than right at
+   the top the way an actual visit to the site would */
 .expand-frame-wrap{
-  flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;
-  container-type:size;--vw:1440px;--vh:900px;
+  flex:1;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;
+  container-type:size;--vw:1080px;--vh:675px;
 }
 .expand-scale{
   width:var(--vw);height:var(--vh);transform-origin:top left;
